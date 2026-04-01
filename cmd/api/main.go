@@ -7,6 +7,10 @@ import (
 	"github.com/thecemakin/hr-project/internal/platform/config"
 	"github.com/thecemakin/hr-project/internal/platform/db"
 	server "github.com/thecemakin/hr-project/internal/platform/http"
+
+	corehrHandler "github.com/thecemakin/hr-project/internal/modules/corehr/handler"
+	corehrRepo "github.com/thecemakin/hr-project/internal/modules/corehr/repository"
+	corehrSvc "github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
 
 func main() {
@@ -21,13 +25,41 @@ func main() {
 	// 2. Setup database connection (ignoring currently to just test boot)
 	database, err := db.Connect(cfg)
 	if err != nil {
-		log.Printf("Warning: Failed to connect to database: %v\nContinuing without db to allow boot test.", err)
-	} else {
-		log.Println("Database connection established:", database.Name())
+		log.Fatalf("Failed to connect to database: %v. Cannot boot up modules.", err)
 	}
+	log.Println("Database connection established:", database.Name())
 
 	// 3. Setup HTTP server and routing
 	srv := server.NewServer()
+
+	// 4. Initialize CoreHR Module
+	employeeRepo := corehrRepo.NewEmployeeRepository(database)
+	departmentRepo := corehrRepo.NewDepartmentRepository(database)
+	positionRepo := corehrRepo.NewPositionRepository(database)
+	assetRepo := corehrRepo.NewAssetRepository(database)
+	assetAssignmentRepo := corehrRepo.NewAssetAssignmentRepository(database)
+
+	employeeSvc := corehrSvc.NewEmployeeService(employeeRepo)
+	departmentSvc := corehrSvc.NewDepartmentService(departmentRepo)
+	positionSvc := corehrSvc.NewPositionService(positionRepo)
+	assetSvc := corehrSvc.NewAssetService(assetRepo)
+	assetAssignmentSvc := corehrSvc.NewAssetAssignmentService(assetAssignmentRepo, assetRepo, employeeRepo)
+
+	employeeHdl := corehrHandler.NewEmployeeHandler(employeeSvc)
+	departmentHdl := corehrHandler.NewDepartmentHandler(departmentSvc)
+	positionHdl := corehrHandler.NewPositionHandler(positionSvc)
+	assetHdl := corehrHandler.NewAssetHandler(assetSvc)
+	assetAssignmentHdl := corehrHandler.NewAssetAssignmentHandler(assetAssignmentSvc)
+
+	// Mount Core HR Routes
+	coreHRRouter := corehrHandler.SetupRoutes(
+		employeeHdl,
+		departmentHdl,
+		positionHdl,
+		assetHdl,
+		assetAssignmentHdl,
+	)
+	srv.Mount("/api/v1/corehr", coreHRRouter)
 
 	log.Printf("Listening and serving HTTP on :%s", cfg.HTTPPort)
 	if err := http.ListenAndServe(":"+cfg.HTTPPort, srv.Router); err != nil {

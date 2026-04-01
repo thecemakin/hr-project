@@ -27,3 +27,6 @@ logs/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+#rules
+RULES.md
