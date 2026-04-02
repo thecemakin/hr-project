@@ -21,6 +21,16 @@ func NewDepartmentHandler(service service.DepartmentService) *DepartmentHandler 
 }
 
 // CreateDepartment handles POST /departments
+// @Summary Create a new department
+// @Description Create a new department with the provided details
+// @Tags Departments
+// @Accept json
+// @Produce json
+// @Param department body model.Department true "Department object"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/departments [post]
 func (h *DepartmentHandler) CreateDepartment(c *fiber.Ctx) error {
 	var body struct {
 		Name        string `json:"name"`
@@ -48,6 +58,15 @@ func (h *DepartmentHandler) CreateDepartment(c *fiber.Ctx) error {
 }
 
 // GetDepartmentByID handles GET /departments/:id
+// @Summary Get department by ID
+// @Description Get detailed information about a department
+// @Tags Departments
+// @Produce json
+// @Param id path int true "Department ID"
+// @Success 200 {object} model.Department
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/corehr/departments/{id} [get]
 func (h *DepartmentHandler) GetDepartmentByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -64,6 +83,14 @@ func (h *DepartmentHandler) GetDepartmentByID(c *fiber.Ctx) error {
 }
 
 // GetDepartmentByName handles GET /departments/name/:name
+// @Summary Get department by name
+// @Description Get detailed information about a department by its unique name
+// @Tags Departments
+// @Produce json
+// @Param name path string true "Department Name"
+// @Success 200 {object} model.Department
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/corehr/departments/name/{name} [get]
 func (h *DepartmentHandler) GetDepartmentByName(c *fiber.Ctx) error {
 	name := c.Params("name")
 	department, err := h.service.GetDepartmentByName(name)
@@ -75,6 +102,15 @@ func (h *DepartmentHandler) GetDepartmentByName(c *fiber.Ctx) error {
 }
 
 // GetAllDepartments handles GET /departments
+// @Summary Get all departments
+// @Description Get a list of all departments with pagination
+// @Tags Departments
+// @Produce json
+// @Param limit query int false "Limit" default(10)
+// @Param offset query int false "Offset" default(0)
+// @Success 200 {array} model.Department
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/departments [get]
 func (h *DepartmentHandler) GetAllDepartments(c *fiber.Ctx) error {
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
@@ -97,7 +133,18 @@ func (h *DepartmentHandler) GetAllDepartments(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(departments)
 }
 
-// UpdateDepartment handles PATCH /departments/:id
+// UpdateDepartment handles PUT /departments/:id
+// @Summary Update a department
+// @Description Update an existing department's details
+// @Tags Departments
+// @Accept json
+// @Produce json
+// @Param id path int true "Department ID"
+// @Param department body model.Department true "Department update object"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/departments/{id} [put]
 func (h *DepartmentHandler) UpdateDepartment(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -119,6 +166,15 @@ func (h *DepartmentHandler) UpdateDepartment(c *fiber.Ctx) error {
 }
 
 // DeleteDepartment handles DELETE /departments/:id
+// @Summary Delete a department
+// @Description Delete a department by its ID
+// @Tags Departments
+// @Produce json
+// @Param id path int true "Department ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/departments/{id} [delete]
 func (h *DepartmentHandler) DeleteDepartment(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)

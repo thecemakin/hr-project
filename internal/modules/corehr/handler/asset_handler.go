@@ -21,6 +21,16 @@ func NewAssetHandler(service service.AssetService) *AssetHandler {
 }
 
 // CreateAsset handles POST /assets
+// @Summary Create a new asset
+// @Description Create a new asset with the provided details
+// @Tags Assets
+// @Accept json
+// @Produce json
+// @Param asset body model.Asset true "Asset object"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/assets [post]
 func (h *AssetHandler) CreateAsset(c *fiber.Ctx) error {
 	var body struct {
 		SerialNumber    string  `json:"serial_number"`
@@ -62,6 +72,15 @@ func (h *AssetHandler) CreateAsset(c *fiber.Ctx) error {
 }
 
 // GetAssetByID handles GET /assets/:id
+// @Summary Get asset by ID
+// @Description Get detailed information about an asset
+// @Tags Assets
+// @Produce json
+// @Param id path int true "Asset ID"
+// @Success 200 {object} model.Asset
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/corehr/assets/{id} [get]
 func (h *AssetHandler) GetAssetByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -78,6 +97,14 @@ func (h *AssetHandler) GetAssetByID(c *fiber.Ctx) error {
 }
 
 // GetAssetBySerialNumber handles GET /assets/serial/:serialNumber
+// @Summary Get asset by serial number
+// @Description Get detailed information about an asset by its serial number
+// @Tags Assets
+// @Produce json
+// @Param serialNumber path string true "Serial Number"
+// @Success 200 {object} model.Asset
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/corehr/assets/serial/{serialNumber} [get]
 func (h *AssetHandler) GetAssetBySerialNumber(c *fiber.Ctx) error {
 	serialNumber := c.Params("serialNumber")
 	asset, err := h.service.GetAssetBySerialNumber(serialNumber)
@@ -89,6 +116,14 @@ func (h *AssetHandler) GetAssetBySerialNumber(c *fiber.Ctx) error {
 }
 
 // GetAssetByAssetTag handles GET /assets/tag/:assetTag
+// @Summary Get asset by asset tag
+// @Description Get detailed information about an asset by its asset tag
+// @Tags Assets
+// @Produce json
+// @Param assetTag path string true "Asset Tag"
+// @Success 200 {object} model.Asset
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/corehr/assets/tag/{assetTag} [get]
 func (h *AssetHandler) GetAssetByAssetTag(c *fiber.Ctx) error {
 	assetTag := c.Params("assetTag")
 	asset, err := h.service.GetAssetByAssetTag(assetTag)
@@ -100,6 +135,15 @@ func (h *AssetHandler) GetAssetByAssetTag(c *fiber.Ctx) error {
 }
 
 // GetAllAssets handles GET /assets
+// @Summary Get all assets
+// @Description Get a list of all assets with pagination
+// @Tags Assets
+// @Produce json
+// @Param limit query int false "Limit" default(10)
+// @Param offset query int false "Offset" default(0)
+// @Success 200 {array} model.Asset
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/assets [get]
 func (h *AssetHandler) GetAllAssets(c *fiber.Ctx) error {
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
@@ -122,7 +166,18 @@ func (h *AssetHandler) GetAllAssets(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(assets)
 }
 
-// UpdateAsset handles PATCH /assets/:id
+// UpdateAsset handles PUT /assets/:id
+// @Summary Update an asset
+// @Description Update an existing asset's details
+// @Tags Assets
+// @Accept json
+// @Produce json
+// @Param id path int true "Asset ID"
+// @Param asset body model.Asset true "Asset update object"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/assets/{id} [put]
 func (h *AssetHandler) UpdateAsset(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -144,6 +199,15 @@ func (h *AssetHandler) UpdateAsset(c *fiber.Ctx) error {
 }
 
 // DeleteAsset handles DELETE /assets/:id
+// @Summary Delete an asset
+// @Description Delete an asset by its ID
+// @Tags Assets
+// @Produce json
+// @Param id path int true "Asset ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/assets/{id} [delete]
 func (h *AssetHandler) DeleteAsset(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -159,6 +223,14 @@ func (h *AssetHandler) DeleteAsset(c *fiber.Ctx) error {
 }
 
 // GetAssetsByStatus handles GET /assets/status/:status
+// @Summary Get assets by status
+// @Description Get a list of assets with a specific status
+// @Tags Assets
+// @Produce json
+// @Param status path string true "Status (available, assigned, maintenance, retired)"
+// @Success 200 {array} model.Asset
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/assets/status/{status} [get]
 func (h *AssetHandler) GetAssetsByStatus(c *fiber.Ctx) error {
 	status := c.Params("status")
 	assets, err := h.service.GetAssetsByStatus(status)
@@ -170,6 +242,14 @@ func (h *AssetHandler) GetAssetsByStatus(c *fiber.Ctx) error {
 }
 
 // GetAssetsByType handles GET /assets/type/:type
+// @Summary Get assets by type
+// @Description Get a list of assets of a specific type
+// @Tags Assets
+// @Produce json
+// @Param type path string true "Asset Type (laptop, phone, tablet, etc.)"
+// @Success 200 {array} model.Asset
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/corehr/assets/type/{type} [get]
 func (h *AssetHandler) GetAssetsByType(c *fiber.Ctx) error {
 	assetType := c.Params("type")
 	assets, err := h.service.GetAssetsByType(assetType)

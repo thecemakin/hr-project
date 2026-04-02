@@ -1,0 +1,2002 @@
+basePath: /
+definitions:
+  github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset:
+    properties:
+      asset_tag:
+        description: Internal tracking number
+        type: string
+      assignments:
+        description: Relationships
+        items:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+        type: array
+      brand:
+        type: string
+      condition:
+        description: new, good, fair, poor
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      model:
+        type: string
+      name:
+        description: e.g., "MacBook Pro 16-inch"
+        type: string
+      purchase_date:
+        type: string
+      purchase_price:
+        description: Purchase price in dollars
+        type: number
+      serial_number:
+        type: string
+      status:
+        description: available, assigned, maintenance, retired
+        type: string
+      type:
+        description: laptop, phone, tablet, etc.
+        type: string
+      updated_at:
+        type: string
+      warranty_expires:
+        type: string
+    type: object
+  github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment:
+    properties:
+      asset:
+        allOf:
+        - $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+        description: Relationships
+      asset_id:
+        type: integer
+      assigned_by:
+        description: ID of the person who assigned the asset
+        type: integer
+      assigned_date:
+        type: string
+      assigner:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+      created_at:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      employee:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+      employee_id:
+        type: integer
+      id:
+        type: integer
+      notes:
+        type: string
+      returned_by:
+        description: ID of the person who returned the asset
+        type: integer
+      returned_date:
+        type: string
+      returner:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+      status:
+        description: Status indicates current state of the assignment
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_thecemakin_hr-project_internal_modules_corehr_model.Department:
+    properties:
+      code:
+        description: e.g., "ENG", "MKT", "FIN"
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      head:
+        allOf:
+        - $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+        description: Relationships
+      head_id:
+        description: ID of the department head (Employee)
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee:
+    properties:
+      address_line1:
+        description: Address Information
+        type: string
+      address_line2:
+        type: string
+      bank_account_number:
+        description: Bank Account Details
+        type: string
+      bank_name:
+        type: string
+      bank_routing_number:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      date_of_birth:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      department:
+        allOf:
+        - $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department'
+        description: Relationships
+      department_id:
+        type: integer
+      email:
+        type: string
+      emergency_contact_name:
+        description: Emergency Contact
+        type: string
+      emergency_contact_phone:
+        type: string
+      emergency_contact_relation:
+        type: string
+      employee_number:
+        description: Employment Information
+        type: string
+      first_name:
+        description: Personal Information
+        type: string
+      gender:
+        description: male, female, other
+        type: string
+      hire_date:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      manager:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+      manager_id:
+        description: Self-referencing foreign key
+        type: integer
+      phone:
+        type: string
+      position:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Position'
+      position_id:
+        type: integer
+      postal_code:
+        type: string
+      state:
+        type: string
+      status:
+        description: active, inactive, terminated
+        type: string
+      subordinates:
+        items:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+        type: array
+      termination_date:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_thecemakin_hr-project_internal_modules_corehr_model.Position:
+    properties:
+      code:
+        description: e.g., "SENG", "MGR", "VP"
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      department:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department'
+      department_id:
+        description: Relationships
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      level:
+        description: Hierarchical level (1-10 scale)
+        type: integer
+      salary_max:
+        description: Maximum salary in cents
+        type: integer
+      salary_min:
+        description: Minimum salary in cents
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveBalance:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      employee:
+        allOf:
+        - $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+        description: Relationships
+      employee_id:
+        type: integer
+      id:
+        type: integer
+      leave_type:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveType'
+      leave_type_id:
+        type: integer
+      total_days:
+        type: integer
+      updated_at:
+        type: string
+      used_days:
+        type: integer
+    type: object
+  github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveRequest:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      employee:
+        allOf:
+        - $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+        description: Relationships
+      employee_id:
+        type: integer
+      end_date:
+        type: string
+      id:
+        type: integer
+      leave_type:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveType'
+      leave_type_id:
+        type: integer
+      reason:
+        type: string
+      reviewer:
+        $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+      reviewer_id:
+        type: integer
+      reviewer_note:
+        type: string
+      start_date:
+        type: string
+      status:
+        description: pending, approved, rejected
+        type: string
+      total_days_requested:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveType:
+    properties:
+      created_at:
+        type: string
+      default_days:
+        type: integer
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a HR management system API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: HR Backend API
+  version: "1.0"
+paths:
+  /api/v1/corehr/asset-assignments:
+    get:
+      description: Get a list of all asset assignments with pagination
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all asset assignments
+      tags:
+      - Asset Assignments
+    post:
+      consumes:
+      - application/json
+      description: Create a new record for an asset assigned to an employee
+      parameters:
+      - description: Asset Assignment object
+        in: body
+        name: assignment
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new asset assignment
+      tags:
+      - Asset Assignments
+  /api/v1/corehr/asset-assignments/{id}:
+    delete:
+      description: Delete an asset assignment by its ID
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an asset assignment
+      tags:
+      - Asset Assignments
+    get:
+      description: Get detailed information about an asset assignment
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get asset assignment by ID
+      tags:
+      - Asset Assignments
+    put:
+      consumes:
+      - application/json
+      description: Update an existing asset assignment's details
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Asset Assignment update object
+        in: body
+        name: assignment
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an asset assignment
+      tags:
+      - Asset Assignments
+  /api/v1/corehr/asset-assignments/active/asset/{assetId}:
+    get:
+      description: Get the current active assignment for a specific asset
+      parameters:
+      - description: Asset ID
+        in: path
+        name: assetId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get active assignment by asset ID
+      tags:
+      - Asset Assignments
+  /api/v1/corehr/asset-assignments/asset/{assetId}:
+    get:
+      description: Get all assignment history for a specific asset
+      parameters:
+      - description: Asset ID
+        in: path
+        name: assetId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get asset assignments by asset ID
+      tags:
+      - Asset Assignments
+  /api/v1/corehr/asset-assignments/current/employee/{employeeId}:
+    get:
+      description: Get only the currently active asset assignments for a specific
+        employee
+      parameters:
+      - description: Employee ID
+        in: path
+        name: employeeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get current active assignments by employee ID
+      tags:
+      - Asset Assignments
+  /api/v1/corehr/asset-assignments/employee/{employeeId}:
+    get:
+      description: Get all assignment history for a specific employee
+      parameters:
+      - description: Employee ID
+        in: path
+        name: employeeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get asset assignments by employee ID
+      tags:
+      - Asset Assignments
+  /api/v1/corehr/assets:
+    get:
+      description: Get a list of all assets with pagination
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all assets
+      tags:
+      - Assets
+    post:
+      consumes:
+      - application/json
+      description: Create a new asset with the provided details
+      parameters:
+      - description: Asset object
+        in: body
+        name: asset
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new asset
+      tags:
+      - Assets
+  /api/v1/corehr/assets/{assignmentId}/return:
+    post:
+      consumes:
+      - application/json
+      description: Mark an assigned asset as returned
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: assignmentId
+        required: true
+        type: integer
+      - description: Return request
+        in: body
+        name: return
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Return an assigned asset
+      tags:
+      - Assets
+  /api/v1/corehr/assets/{id}:
+    delete:
+      description: Delete an asset by its ID
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an asset
+      tags:
+      - Assets
+    get:
+      description: Get detailed information about an asset
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get asset by ID
+      tags:
+      - Assets
+    put:
+      consumes:
+      - application/json
+      description: Update an existing asset's details
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Asset update object
+        in: body
+        name: asset
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an asset
+      tags:
+      - Assets
+  /api/v1/corehr/assets/assign:
+    post:
+      consumes:
+      - application/json
+      description: Directly assign an asset to an employee
+      parameters:
+      - description: Assignment request
+        in: body
+        name: assignment
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Assign an asset to an employee (convenience)
+      tags:
+      - Assets
+  /api/v1/corehr/assets/serial/{serialNumber}:
+    get:
+      description: Get detailed information about an asset by its serial number
+      parameters:
+      - description: Serial Number
+        in: path
+        name: serialNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get asset by serial number
+      tags:
+      - Assets
+  /api/v1/corehr/assets/status/{status}:
+    get:
+      description: Get a list of assets with a specific status
+      parameters:
+      - description: Status (available, assigned, maintenance, retired)
+        in: path
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get assets by status
+      tags:
+      - Assets
+  /api/v1/corehr/assets/tag/{assetTag}:
+    get:
+      description: Get detailed information about an asset by its asset tag
+      parameters:
+      - description: Asset Tag
+        in: path
+        name: assetTag
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get asset by asset tag
+      tags:
+      - Assets
+  /api/v1/corehr/assets/type/{type}:
+    get:
+      description: Get a list of assets of a specific type
+      parameters:
+      - description: Asset Type (laptop, phone, tablet, etc.)
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get assets by type
+      tags:
+      - Assets
+  /api/v1/corehr/departments:
+    get:
+      description: Get a list of all departments with pagination
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all departments
+      tags:
+      - Departments
+    post:
+      consumes:
+      - application/json
+      description: Create a new department with the provided details
+      parameters:
+      - description: Department object
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new department
+      tags:
+      - Departments
+  /api/v1/corehr/departments/{id}:
+    delete:
+      description: Delete a department by its ID
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a department
+      tags:
+      - Departments
+    get:
+      description: Get detailed information about a department
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get department by ID
+      tags:
+      - Departments
+    put:
+      consumes:
+      - application/json
+      description: Update an existing department's details
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Department update object
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a department
+      tags:
+      - Departments
+  /api/v1/corehr/departments/name/{name}:
+    get:
+      description: Get detailed information about a department by its unique name
+      parameters:
+      - description: Department Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get department by name
+      tags:
+      - Departments
+  /api/v1/corehr/employees:
+    get:
+      description: Get a list of all employees with pagination
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all employees
+      tags:
+      - Employees
+    post:
+      consumes:
+      - application/json
+      description: Create a new employee with the provided details
+      parameters:
+      - description: Employee object
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new employee
+      tags:
+      - Employees
+  /api/v1/corehr/employees/{id}:
+    delete:
+      description: Delete an employee by their ID
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an employee
+      tags:
+      - Employees
+    get:
+      description: Get detailed information about an employee
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get employee by ID
+      tags:
+      - Employees
+    put:
+      consumes:
+      - application/json
+      description: Update an existing employee's details
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Employee update object
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an employee
+      tags:
+      - Employees
+  /api/v1/corehr/employees/department/{departmentId}:
+    get:
+      description: Get a list of employees in a specific department
+      parameters:
+      - description: Department ID
+        in: path
+        name: departmentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get employees by department ID
+      tags:
+      - Employees
+  /api/v1/corehr/employees/email/{email}:
+    get:
+      description: Get detailed information about an employee by their email address
+      parameters:
+      - description: Employee Email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get employee by email
+      tags:
+      - Employees
+  /api/v1/corehr/employees/manager/{managerId}:
+    get:
+      description: Get a list of employees reporting to a specific manager
+      parameters:
+      - description: Manager ID
+        in: path
+        name: managerId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get employees by manager ID
+      tags:
+      - Employees
+  /api/v1/corehr/employees/status/{status}:
+    get:
+      description: Get a list of employees with a specific employment status
+      parameters:
+      - description: Status (active, inactive, terminated)
+        in: path
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get employees by status
+      tags:
+      - Employees
+  /api/v1/corehr/positions:
+    get:
+      description: Get a list of all positions with pagination
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Position'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all positions
+      tags:
+      - Positions
+    post:
+      consumes:
+      - application/json
+      description: Create a new job position or role
+      parameters:
+      - description: Position object
+        in: body
+        name: position
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Position'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new position
+      tags:
+      - Positions
+  /api/v1/corehr/positions/{id}:
+    delete:
+      description: Delete a position by its ID
+      parameters:
+      - description: Position ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a position
+      tags:
+      - Positions
+    get:
+      description: Get detailed information about a position
+      parameters:
+      - description: Position ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Position'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get position by ID
+      tags:
+      - Positions
+    put:
+      consumes:
+      - application/json
+      description: Update an existing position's details
+      parameters:
+      - description: Position ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Position update object
+        in: body
+        name: position
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Position'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a position
+      tags:
+      - Positions
+  /api/v1/corehr/positions/title/{title}:
+    get:
+      description: Get detailed information about a position by its title
+      parameters:
+      - description: Position Title
+        in: path
+        name: title
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Position'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get position by title
+      tags:
+      - Positions
+  /api/v1/leave/leave-balances/{employeeId}:
+    get:
+      description: Get a list of all leave balances (total and used) for a specific
+        employee
+      parameters:
+      - description: Employee ID
+        in: path
+        name: employeeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveBalance'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List leave balances for an employee
+      tags:
+      - Leave Balances
+  /api/v1/leave/leave-balances/init:
+    post:
+      consumes:
+      - application/json
+      description: Set the starting leave balance for an employee and leave type
+      parameters:
+      - description: Initialization request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Initialize leave balance for an employee
+      tags:
+      - Leave Balances
+  /api/v1/leave/leave-requests:
+    post:
+      consumes:
+      - application/json
+      description: Create a new leave request for approval
+      parameters:
+      - description: Leave Request object
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveRequest'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Submit a new leave request
+      tags:
+      - Leave Requests
+  /api/v1/leave/leave-requests/{id}/approve:
+    post:
+      consumes:
+      - application/json
+      description: Approve a pending leave request
+      parameters:
+      - description: Leave Request ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Manager ID (simulation of auth context)
+        in: query
+        name: managerId
+        required: true
+        type: integer
+      - description: Approval note
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Approve a leave request
+      tags:
+      - Leave Requests
+  /api/v1/leave/leave-requests/{id}/reject:
+    post:
+      consumes:
+      - application/json
+      description: Reject a pending leave request
+      parameters:
+      - description: Leave Request ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Manager ID (simulation of auth context)
+        in: query
+        name: managerId
+        required: true
+        type: integer
+      - description: Rejection note
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reject a leave request
+      tags:
+      - Leave Requests
+  /api/v1/leave/leave-requests/me:
+    get:
+      description: Get a list of leave requests submitted by the current employee
+      parameters:
+      - description: Employee ID (simulation of auth context)
+        in: query
+        name: employeeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveRequest'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List own leave requests
+      tags:
+      - Leave Requests
+  /api/v1/leave/leave-requests/pending-approvals:
+    get:
+      description: Get a list of leave requests pending approval for a specific manager
+      parameters:
+      - description: Manager ID (simulation of auth context)
+        in: query
+        name: managerId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveRequest'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List pending leave requests for approval
+      tags:
+      - Leave Requests
+  /api/v1/leave/leave-types:
+    get:
+      description: Get a list of all available leave types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveType'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all leave types
+      tags:
+      - Leave Types
+    post:
+      consumes:
+      - application/json
+      description: Create a new category for leave requests
+      parameters:
+      - description: Leave Type object
+        in: body
+        name: leaveType
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveType'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveType'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new leave type
+      tags:
+      - Leave Types
+  /api/v1/leave/leave-types/{id}:
+    get:
+      description: Get detailed information about a leave type
+      parameters:
+      - description: Leave Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_leave_model.LeaveType'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get leave type by ID
+      tags:
+      - Leave Types
+swagger: "2.0"

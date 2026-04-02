@@ -1,4 +1,4 @@
-.PHONY: run build test tidy clean migrate-up migrate-down
+.PHONY: run build test tidy clean migrate-up migrate-down swagger
 
 # Default app path
 APP_ENTRY=./cmd/api/main.go
@@ -33,3 +33,6 @@ migrate-version:
 
 clean:
 	rm -rf bin/
+
+swagger:
+	$(shell go env GOPATH)/bin/swag init -g cmd/api/main.go -d ./ -o docs/openapi --parseDependency --parseInternal
