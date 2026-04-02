@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS leave_balances (
+    id SERIAL PRIMARY KEY,
+    employee_id INT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+    leave_type_id INT NOT NULL REFERENCES leave_types(id) ON DELETE CASCADE,
+    total_days INT NOT NULL DEFAULT 0,
+    used_days INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    UNIQUE(employee_id, leave_type_id)
+);

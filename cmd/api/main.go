@@ -11,6 +11,11 @@ import (
 	corehrHandler "github.com/thecemakin/hr-project/internal/modules/corehr/handler"
 	corehrRepo "github.com/thecemakin/hr-project/internal/modules/corehr/repository"
 	corehrSvc "github.com/thecemakin/hr-project/internal/modules/corehr/service"
+
+	leaveHandler "github.com/thecemakin/hr-project/internal/modules/leave/handler"
+	leaveRepo "github.com/thecemakin/hr-project/internal/modules/leave/repository"
+	leaveSvc "github.com/thecemakin/hr-project/internal/modules/leave/service"
+	"github.com/go-chi/chi/v5"
 )
 
 func main() {
@@ -60,6 +65,14 @@ func main() {
 		assetAssignmentHdl,
 	)
 	srv.Mount("/api/v1/corehr", coreHRRouter)
+
+	// 5. Initialize Leave Module
+	leaveRepository := leaveRepo.NewSQLRepository(database)
+	leaveService := leaveSvc.NewLeaveService(leaveRepository, employeeRepo)
+	
+	leaveRouter := chi.NewRouter()
+	leaveHandler.RegisterRoutes(leaveRouter, leaveService)
+	srv.Mount("/api/v1/leave", leaveRouter)
 
 	log.Printf("Listening and serving HTTP on :%s", cfg.HTTPPort)
 	if err := http.ListenAndServe(":"+cfg.HTTPPort, srv.Router); err != nil {
