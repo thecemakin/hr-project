@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
-	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
@@ -23,7 +21,7 @@ func NewPositionHandler(service service.PositionService) *PositionHandler {
 }
 
 // CreatePosition handles POST /positions
-func (h *PositionHandler) CreatePosition(w http.ResponseWriter, r *http.Request) {
+func (h *PositionHandler) CreatePosition(c *fiber.Ctx) error {
 	var body struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
@@ -35,9 +33,8 @@ func (h *PositionHandler) CreatePosition(w http.ResponseWriter, r *http.Request)
 		DepartmentID *uint `json:"department_id"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	position := &model.Position{
@@ -52,47 +49,43 @@ func (h *PositionHandler) CreatePosition(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := h.service.CreatePosition(position); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusCreated, map[string]string{"message": "Position created successfully"})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Position created successfully"})
 }
 
 // GetPositionByID handles GET /positions/:id
-func (h *PositionHandler) GetPositionByID(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *PositionHandler) GetPositionByID(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid position ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid position ID"})
 	}
 
 	position, err := h.service.GetPositionByID(uint(id))
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Position not found")
-		return
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Position not found"})
 	}
 
-	respondWithJSON(w, http.StatusOK, position)
+	return c.Status(fiber.StatusOK).JSON(position)
 }
 
 // GetPositionByTitle handles GET /positions/title/:title
-func (h *PositionHandler) GetPositionByTitle(w http.ResponseWriter, r *http.Request) {
-	title := chi.URLParam(r, "title")
+func (h *PositionHandler) GetPositionByTitle(c *fiber.Ctx) error {
+	title := c.Params("title")
 	position, err := h.service.GetPositionByTitle(title)
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Position not found")
-		return
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Position not found"})
 	}
 
-	respondWithJSON(w, http.StatusOK, position)
+	return c.Status(fiber.StatusOK).JSON(position)
 }
 
 // GetAllPositions handles GET /positions
-func (h *PositionHandler) GetAllPositions(w http.ResponseWriter, r *http.Request) {
-	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
+func (h *PositionHandler) GetAllPositions(c *fiber.Ctx) error {
+	limitStr := c.Query("limit")
+	offsetStr := c.Query("offset")
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 || limit > 100 {
@@ -106,50 +99,44 @@ func (h *PositionHandler) GetAllPositions(w http.ResponseWriter, r *http.Request
 
 	positions, err := h.service.GetAllPositions(limit, offset)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, positions)
+	return c.Status(fiber.StatusOK).JSON(positions)
 }
 
 // UpdatePosition handles PATCH /positions/:id
-func (h *PositionHandler) UpdatePosition(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *PositionHandler) UpdatePosition(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid position ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid position ID"})
 	}
 
 	var body model.Position
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	body.ID = uint(id)
 
 	if err := h.service.UpdatePosition(&body); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Position updated successfully"})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Position updated successfully"})
 }
 
 // DeletePosition handles DELETE /positions/:id
-func (h *PositionHandler) DeletePosition(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *PositionHandler) DeletePosition(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid position ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid position ID"})
 	}
 
 	if err := h.service.DeletePosition(uint(id)); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Position deleted successfully"})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Position deleted successfully"})
 }

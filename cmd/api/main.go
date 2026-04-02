@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/thecemakin/hr-project/internal/platform/config"
 	"github.com/thecemakin/hr-project/internal/platform/db"
@@ -15,7 +14,6 @@ import (
 	leaveHandler "github.com/thecemakin/hr-project/internal/modules/leave/handler"
 	leaveRepo "github.com/thecemakin/hr-project/internal/modules/leave/repository"
 	leaveSvc "github.com/thecemakin/hr-project/internal/modules/leave/service"
-	"github.com/go-chi/chi/v5"
 )
 
 func main() {
@@ -57,25 +55,16 @@ func main() {
 	assetAssignmentHdl := corehrHandler.NewAssetAssignmentHandler(assetAssignmentSvc)
 
 	// Mount Core HR Routes
-	coreHRRouter := corehrHandler.SetupRoutes(
-		employeeHdl,
-		departmentHdl,
-		positionHdl,
-		assetHdl,
-		assetAssignmentHdl,
-	)
-	srv.Mount("/api/v1/corehr", coreHRRouter)
+	corehrHandler.SetupRoutesFiber(srv.App, employeeHdl, departmentHdl, positionHdl, assetHdl, assetAssignmentHdl)
 
 	// 5. Initialize Leave Module
 	leaveRepository := leaveRepo.NewSQLRepository(database)
 	leaveService := leaveSvc.NewLeaveService(leaveRepository, employeeRepo)
 	
-	leaveRouter := chi.NewRouter()
-	leaveHandler.RegisterRoutes(leaveRouter, leaveService)
-	srv.Mount("/api/v1/leave", leaveRouter)
+	leaveHandler.SetupRoutesFiber(srv.App, leaveService)
 
 	log.Printf("Listening and serving HTTP on :%s", cfg.HTTPPort)
-	if err := http.ListenAndServe(":"+cfg.HTTPPort, srv.Router); err != nil {
+	if err := srv.App.Listen(":" + cfg.HTTPPort); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }

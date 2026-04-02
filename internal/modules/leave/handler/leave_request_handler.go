@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
-	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/leave/model"
 	"github.com/thecemakin/hr-project/internal/modules/leave/service"
 )
@@ -18,120 +16,102 @@ func NewLeaveRequestHandler(service service.LeaveService) *LeaveRequestHandler {
 	return &LeaveRequestHandler{service: service}
 }
 
-func (h *LeaveRequestHandler) SubmitRequest(w http.ResponseWriter, r *http.Request) {
+func (h *LeaveRequestHandler) SubmitRequest(c *fiber.Ctx) error {
 	var req model.LeaveRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	if err := h.service.SubmitLeaveRequest(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(req)
+	return c.Status(fiber.StatusCreated).JSON(req)
 }
 
-func (h *LeaveRequestHandler) ListOwnRequests(w http.ResponseWriter, r *http.Request) {
+func (h *LeaveRequestHandler) ListOwnRequests(c *fiber.Ctx) error {
 	// In a real app, empID would come from JWT / auth context.
 	// For testing, we might pass it via a query param or header until Auth is built.
-	empIDStr := r.URL.Query().Get("employeeId")
-	empID, err := strconv.ParseUint(empIDStr, 10, 32)
+	tempIDStr := c.Query("employeeId")
+	tempID, err := strconv.ParseUint(tempIDStr, 10, 32)
 	if err != nil {
-		http.Error(w, "missing or invalid employeeId query param", http.StatusUnauthorized)
-		return
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing or invalid employeeId query param"})
 	}
 
-	reqs, err := h.service.ListOwnLeaveRequests(uint(empID))
+	reqs, err := h.service.ListOwnLeaveRequests(uint(tempID))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(reqs)
+	return c.JSON(reqs)
 }
 
-func (h *LeaveRequestHandler) ListPendingApprovals(w http.ResponseWriter, r *http.Request) {
+func (h *LeaveRequestHandler) ListPendingApprovals(c *fiber.Ctx) error {
 	// From JWT context representing the logged-in manager
-	managerIDStr := r.URL.Query().Get("managerId")
+	managerIDStr := c.Query("managerId")
 	managerID, err := strconv.ParseUint(managerIDStr, 10, 32)
 	if err != nil {
-		http.Error(w, "missing or invalid managerId query param", http.StatusUnauthorized)
-		return
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing or invalid managerId query param"})
 	}
 
 	reqs, err := h.service.ListPendingApprovals(uint(managerID))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(reqs)
+	return c.JSON(reqs)
 }
 
-func (h *LeaveRequestHandler) ApproveRequest(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
+func (h *LeaveRequestHandler) ApproveRequest(c *fiber.Ctx) error {
+	idStr := c.Params("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		http.Error(w, "invalid id", http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
 	}
 
 	// From JWT context
-	managerIDStr := r.URL.Query().Get("managerId")
+	managerIDStr := c.Query("managerId")
 	managerID, err := strconv.ParseUint(managerIDStr, 10, 32)
 	if err != nil {
-		http.Error(w, "missing or invalid managerId query param", http.StatusUnauthorized)
-		return
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing or invalid managerId query param"})
 	}
 
 	var payload struct {
 		Note string `json:"note"`
 	}
 	// Note is optional
-	_ = json.NewDecoder(r.Body).Decode(&payload)
+	_ = c.BodyParser(&payload)
 
 	if err := h.service.ApproveLeaveRequest(uint(id), uint(managerID), payload.Note); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"approved"}`))
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "approved"})
 }
 
-func (h *LeaveRequestHandler) RejectRequest(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
+func (h *LeaveRequestHandler) RejectRequest(c *fiber.Ctx) error {
+	idStr := c.Params("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		http.Error(w, "invalid id", http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
 	}
 
 	// From JWT context
-	managerIDStr := r.URL.Query().Get("managerId")
+	managerIDStr := c.Query("managerId")
 	managerID, err := strconv.ParseUint(managerIDStr, 10, 32)
 	if err != nil {
-		http.Error(w, "missing or invalid managerId query param", http.StatusUnauthorized)
-		return
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing or invalid managerId query param"})
 	}
 
 	var payload struct {
 		Note string `json:"note"`
 	}
 	// Note is optional
-	_ = json.NewDecoder(r.Body).Decode(&payload)
+	_ = c.BodyParser(&payload)
 
 	if err := h.service.RejectLeaveRequest(uint(id), uint(managerID), payload.Note); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"rejected"}`))
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "rejected"})
 }

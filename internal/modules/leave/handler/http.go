@@ -1,34 +1,39 @@
 package handler
 
 import (
-	"github.com/go-chi/chi/v5"
+	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/leave/service"
 )
 
-func RegisterRoutes(r chi.Router, svc service.LeaveService) {
+// SetupRoutesFiber configures all the routes for the Leave module using Fiber
+func SetupRoutesFiber(app *fiber.App, svc service.LeaveService) {
 	leaveTypeHandler := NewLeaveTypeHandler(svc)
 	leaveBalanceHandler := NewLeaveBalanceHandler(svc)
 	leaveRequestHandler := NewLeaveRequestHandler(svc)
 
+	// Create group for Leave routes
+	v1 := app.Group("/api/v1/leave")
+
 	// Leave Types
-	r.Route("/leave-types", func(r chi.Router) {
-		r.Get("/", leaveTypeHandler.ListLeaveTypes)
-		r.Post("/", leaveTypeHandler.CreateLeaveType)
-		r.Get("/{id}", leaveTypeHandler.GetLeaveType)
-	})
+	v1.Get("/leave-types", leaveTypeHandler.ListLeaveTypes)
+	v1.Post("/leave-types", leaveTypeHandler.CreateLeaveType)
+	v1.Get("/leave-types/:id", leaveTypeHandler.GetLeaveType)
 
 	// Leave Balances
-	r.Route("/leave-balances", func(r chi.Router) {
-		r.Get("/{employeeId}", leaveBalanceHandler.ListLeaveBalancesByEmployee)
-		r.Post("/init", leaveBalanceHandler.InitializeBalance)
-	})
+	v1.Get("/leave-balances/:employeeId", leaveBalanceHandler.ListLeaveBalancesByEmployee)
+	v1.Post("/leave-balances/init", leaveBalanceHandler.InitializeBalance)
 
 	// Leave Requests
-	r.Route("/leave-requests", func(r chi.Router) {
-		r.Post("/", leaveRequestHandler.SubmitRequest)
-		r.Get("/me", leaveRequestHandler.ListOwnRequests)
-		r.Get("/pending-approvals", leaveRequestHandler.ListPendingApprovals)
-		r.Post("/{id}/approve", leaveRequestHandler.ApproveRequest)
-		r.Post("/{id}/reject", leaveRequestHandler.RejectRequest)
-	})
+	v1.Post("/leave-requests", leaveRequestHandler.SubmitRequest)
+	v1.Get("/leave-requests/me", leaveRequestHandler.ListOwnRequests)
+	v1.Get("/leave-requests/pending-approvals", leaveRequestHandler.ListPendingApprovals)
+	v1.Post("/leave-requests/:id/approve", leaveRequestHandler.ApproveRequest)
+	v1.Post("/leave-requests/:id/reject", leaveRequestHandler.RejectRequest)
+}
+
+// RegisterRoutes is kept for backward compatibility but should not be used with Fiber
+func RegisterRoutes(r interface{}, svc service.LeaveService) {
+	// This function is kept for backward compatibility but should not be used with Fiber
+	// The Fiber routes are registered via SetupRoutesFiber
+	// For now, leaving empty as we're migrating to Fiber
 }

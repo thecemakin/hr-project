@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
-	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/leave/model"
 	"github.com/thecemakin/hr-project/internal/modules/leave/service"
 )
@@ -18,48 +16,39 @@ func NewLeaveTypeHandler(service service.LeaveService) *LeaveTypeHandler {
 	return &LeaveTypeHandler{service: service}
 }
 
-func (h *LeaveTypeHandler) CreateLeaveType(w http.ResponseWriter, r *http.Request) {
+func (h *LeaveTypeHandler) CreateLeaveType(c *fiber.Ctx) error {
 	var lt model.LeaveType
-	if err := json.NewDecoder(r.Body).Decode(&lt); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	if err := c.BodyParser(&lt); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	if err := h.service.CreateLeaveType(&lt); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(lt)
+	return c.Status(fiber.StatusCreated).JSON(lt)
 }
 
-func (h *LeaveTypeHandler) GetLeaveType(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
+func (h *LeaveTypeHandler) GetLeaveType(c *fiber.Ctx) error {
+	idStr := c.Params("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		http.Error(w, "invalid id", http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
 	}
 
 	lt, err := h.service.GetLeaveTypeByID(uint(id))
 	if err != nil {
-		http.Error(w, "leave type not found", http.StatusNotFound)
-		return
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "leave type not found"})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(lt)
+	return c.JSON(lt)
 }
 
-func (h *LeaveTypeHandler) ListLeaveTypes(w http.ResponseWriter, r *http.Request) {
+func (h *LeaveTypeHandler) ListLeaveTypes(c *fiber.Ctx) error {
 	lts, err := h.service.ListLeaveTypes()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(lts)
+	return c.JSON(lts)
 }

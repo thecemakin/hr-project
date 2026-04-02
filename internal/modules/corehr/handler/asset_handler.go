@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
-	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
@@ -23,7 +21,7 @@ func NewAssetHandler(service service.AssetService) *AssetHandler {
 }
 
 // CreateAsset handles POST /assets
-func (h *AssetHandler) CreateAsset(w http.ResponseWriter, r *http.Request) {
+func (h *AssetHandler) CreateAsset(c *fiber.Ctx) error {
 	var body struct {
 		SerialNumber    string  `json:"serial_number"`
 		Name            string  `json:"name"`
@@ -39,9 +37,8 @@ func (h *AssetHandler) CreateAsset(w http.ResponseWriter, r *http.Request) {
 		WarrantyExpires *string `json:"warranty_expires"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	asset := &model.Asset{
@@ -58,59 +55,54 @@ func (h *AssetHandler) CreateAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.CreateAsset(asset); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusCreated, map[string]string{"message": "Asset created successfully"})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Asset created successfully"})
 }
 
 // GetAssetByID handles GET /assets/:id
-func (h *AssetHandler) GetAssetByID(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *AssetHandler) GetAssetByID(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid asset ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid asset ID"})
 	}
 
 	asset, err := h.service.GetAssetByID(uint(id))
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Asset not found")
-		return
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Asset not found"})
 	}
 
-	respondWithJSON(w, http.StatusOK, asset)
+	return c.Status(fiber.StatusOK).JSON(asset)
 }
 
 // GetAssetBySerialNumber handles GET /assets/serial/:serialNumber
-func (h *AssetHandler) GetAssetBySerialNumber(w http.ResponseWriter, r *http.Request) {
-	serialNumber := chi.URLParam(r, "serialNumber")
+func (h *AssetHandler) GetAssetBySerialNumber(c *fiber.Ctx) error {
+	serialNumber := c.Params("serialNumber")
 	asset, err := h.service.GetAssetBySerialNumber(serialNumber)
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Asset not found")
-		return
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Asset not found"})
 	}
 
-	respondWithJSON(w, http.StatusOK, asset)
+	return c.Status(fiber.StatusOK).JSON(asset)
 }
 
 // GetAssetByAssetTag handles GET /assets/tag/:assetTag
-func (h *AssetHandler) GetAssetByAssetTag(w http.ResponseWriter, r *http.Request) {
-	assetTag := chi.URLParam(r, "assetTag")
+func (h *AssetHandler) GetAssetByAssetTag(c *fiber.Ctx) error {
+	assetTag := c.Params("assetTag")
 	asset, err := h.service.GetAssetByAssetTag(assetTag)
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Asset not found")
-		return
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Asset not found"})
 	}
 
-	respondWithJSON(w, http.StatusOK, asset)
+	return c.Status(fiber.StatusOK).JSON(asset)
 }
 
 // GetAllAssets handles GET /assets
-func (h *AssetHandler) GetAllAssets(w http.ResponseWriter, r *http.Request) {
-	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
+func (h *AssetHandler) GetAllAssets(c *fiber.Ctx) error {
+	limitStr := c.Query("limit")
+	offsetStr := c.Query("offset")
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 || limit > 100 {
@@ -124,74 +116,66 @@ func (h *AssetHandler) GetAllAssets(w http.ResponseWriter, r *http.Request) {
 
 	assets, err := h.service.GetAllAssets(limit, offset)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, assets)
+	return c.Status(fiber.StatusOK).JSON(assets)
 }
 
 // UpdateAsset handles PATCH /assets/:id
-func (h *AssetHandler) UpdateAsset(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *AssetHandler) UpdateAsset(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid asset ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid asset ID"})
 	}
 
 	var body model.Asset
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	body.ID = uint(id)
 
 	if err := h.service.UpdateAsset(&body); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Asset updated successfully"})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Asset updated successfully"})
 }
 
 // DeleteAsset handles DELETE /assets/:id
-func (h *AssetHandler) DeleteAsset(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *AssetHandler) DeleteAsset(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid asset ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid asset ID"})
 	}
 
 	if err := h.service.DeleteAsset(uint(id)); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Asset deleted successfully"})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Asset deleted successfully"})
 }
 
 // GetAssetsByStatus handles GET /assets/status/:status
-func (h *AssetHandler) GetAssetsByStatus(w http.ResponseWriter, r *http.Request) {
-	status := chi.URLParam(r, "status")
+func (h *AssetHandler) GetAssetsByStatus(c *fiber.Ctx) error {
+	status := c.Params("status")
 	assets, err := h.service.GetAssetsByStatus(status)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, assets)
+	return c.Status(fiber.StatusOK).JSON(assets)
 }
 
 // GetAssetsByType handles GET /assets/type/:type
-func (h *AssetHandler) GetAssetsByType(w http.ResponseWriter, r *http.Request) {
-	assetType := chi.URLParam(r, "type")
+func (h *AssetHandler) GetAssetsByType(c *fiber.Ctx) error {
+	assetType := c.Params("type")
 	assets, err := h.service.GetAssetsByType(assetType)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, assets)
+	return c.Status(fiber.StatusOK).JSON(assets)
 }

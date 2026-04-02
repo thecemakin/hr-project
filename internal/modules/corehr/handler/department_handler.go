@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
-	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
@@ -23,7 +21,7 @@ func NewDepartmentHandler(service service.DepartmentService) *DepartmentHandler 
 }
 
 // CreateDepartment handles POST /departments
-func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Request) {
+func (h *DepartmentHandler) CreateDepartment(c *fiber.Ctx) error {
 	var body struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
@@ -31,9 +29,8 @@ func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Requ
 		HeadID      *uint  `json:"head_id"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	department := &model.Department{
@@ -44,47 +41,43 @@ func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := h.service.CreateDepartment(department); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusCreated, map[string]string{"message": "Department created successfully"})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Department created successfully"})
 }
 
 // GetDepartmentByID handles GET /departments/:id
-func (h *DepartmentHandler) GetDepartmentByID(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *DepartmentHandler) GetDepartmentByID(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid department ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid department ID"})
 	}
 
 	department, err := h.service.GetDepartmentByID(uint(id))
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Department not found")
-		return
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Department not found"})
 	}
 
-	respondWithJSON(w, http.StatusOK, department)
+	return c.Status(fiber.StatusOK).JSON(department)
 }
 
 // GetDepartmentByName handles GET /departments/name/:name
-func (h *DepartmentHandler) GetDepartmentByName(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
+func (h *DepartmentHandler) GetDepartmentByName(c *fiber.Ctx) error {
+	name := c.Params("name")
 	department, err := h.service.GetDepartmentByName(name)
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Department not found")
-		return
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Department not found"})
 	}
 
-	respondWithJSON(w, http.StatusOK, department)
+	return c.Status(fiber.StatusOK).JSON(department)
 }
 
 // GetAllDepartments handles GET /departments
-func (h *DepartmentHandler) GetAllDepartments(w http.ResponseWriter, r *http.Request) {
-	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
+func (h *DepartmentHandler) GetAllDepartments(c *fiber.Ctx) error {
+	limitStr := c.Query("limit")
+	offsetStr := c.Query("offset")
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 || limit > 100 {
@@ -98,50 +91,44 @@ func (h *DepartmentHandler) GetAllDepartments(w http.ResponseWriter, r *http.Req
 
 	departments, err := h.service.GetAllDepartments(limit, offset)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, departments)
+	return c.Status(fiber.StatusOK).JSON(departments)
 }
 
 // UpdateDepartment handles PATCH /departments/:id
-func (h *DepartmentHandler) UpdateDepartment(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *DepartmentHandler) UpdateDepartment(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid department ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid department ID"})
 	}
 
 	var body model.Department
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	body.ID = uint(id)
 
 	if err := h.service.UpdateDepartment(&body); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Department updated successfully"})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Department updated successfully"})
 }
 
 // DeleteDepartment handles DELETE /departments/:id
-func (h *DepartmentHandler) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
+func (h *DepartmentHandler) DeleteDepartment(c *fiber.Ctx) error {
+	idParam := c.Params("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid department ID")
-		return
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid department ID"})
 	}
 
 	if err := h.service.DeleteDepartment(uint(id)); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Department deleted successfully"})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Department deleted successfully"})
 }
