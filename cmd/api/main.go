@@ -67,7 +67,7 @@ func main() {
 	tp := auth.NewTokenProvider(cfg.JWTSecret, ttl)
 
 	// 4. Setup HTTP server and routing
-	srv := server.NewServer()
+	srv := server.NewServer(database)
 
 	// 5. Initialize Auth Module
 	userRepository := authRepo.NewUserRepository(database)

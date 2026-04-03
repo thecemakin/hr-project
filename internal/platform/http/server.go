@@ -2,29 +2,51 @@ package http
 
 import (
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
-	"github.com/yokeTH/gofiber-scalar/scalar/v2"
 	"github.com/thecemakin/hr-project/docs/openapi"
+	"github.com/yokeTH/gofiber-scalar/scalar/v2"
+	"gorm.io/gorm"
 )
 
 type Server struct {
 	App *fiber.App
 }
 
-func NewServer() *Server {
+func NewServer(database *gorm.DB) *Server {
 	app := fiber.New()
 
 	// A good base middleware stack
 	app.Use(recover.New())
 	app.Use(logger.New())
 
+	startTime := time.Now()
+
 	// Base API route
 	app.Get("/api/v1/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "ok"})
+		status := "ok"
+		dbStatus := "connected"
+
+		// Ping database
+		sqlDB, err := database.DB()
+		if err != nil {
+			status = "error"
+			dbStatus = "invalid_db_instance"
+		} else if err := sqlDB.Ping(); err != nil {
+			status = "error"
+			dbStatus = "disconnected"
+		}
+
+		return c.JSON(fiber.Map{
+			"status": status,
+			"database": dbStatus,
+			"uptime": time.Since(startTime).String(),
+			"version": "1.0.0",
+		})
 	})
 
 	// Swagger UI

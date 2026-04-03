@@ -22,7 +22,9 @@ type Config struct {
 
 func Load() (*Config, error) {
 	// Try loading .env file, ignore error if it doesn't exist (e.g., in production)
-	_ = godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
+	}
 
 	cfg := &Config{
 		AppEnv:            getEnv("APP_ENV", "development"),
@@ -37,6 +39,11 @@ func Load() (*Config, error) {
 		JWTAccessTokenTTL: getEnv("JWT_ACCESS_TOKEN_TTL", "15m"),
 	}
 
+	// Security warning for production
+	if cfg.AppEnv == "production" && cfg.JWTSecret == "super-secret-key-change-me" {
+		log.Println("[WARNING] JWT_SECRET is set to the default value in production. This is HIGHLY INSECURE.")
+	}
+
 	return cfg, nil
 }
 
@@ -44,6 +51,10 @@ func getEnv(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
 	}
-	log.Printf("Environment variable %s not set, falling back to %s", key, fallback)
+	
+	// Only log warnings for non-critical fallbacks or when specific keys are missing
+	if fallback != "" {
+		log.Printf("[INFO] Configuration: %s not set, using default: %s", key, fallback)
+	}
 	return fallback
 }
