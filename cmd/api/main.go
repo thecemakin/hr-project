@@ -17,10 +17,16 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/thecemakin/hr-project/internal/platform/config"
 	"github.com/thecemakin/hr-project/internal/platform/db"
 	server "github.com/thecemakin/hr-project/internal/platform/http"
+	"github.com/thecemakin/hr-project/internal/platform/auth"
+
+	authHandler "github.com/thecemakin/hr-project/internal/modules/auth/handler"
+	authRepo "github.com/thecemakin/hr-project/internal/modules/auth/repository"
+	authSvc "github.com/thecemakin/hr-project/internal/modules/auth/service"
 
 	corehrHandler "github.com/thecemakin/hr-project/internal/modules/corehr/handler"
 	corehrRepo "github.com/thecemakin/hr-project/internal/modules/corehr/repository"
@@ -47,10 +53,26 @@ func main() {
 	}
 	log.Println("Database connection established:", database.Name())
 
-	// 3. Setup HTTP server and routing
+	// 3. Setup Auth Platform
+	ttl, err := time.ParseDuration(cfg.JWTAccessTokenTTL)
+	if err != nil {
+		log.Printf("Invalid JWT TTL: %v, falling back to 15m", err)
+		ttl = 15 * time.Minute
+	}
+	tp := auth.NewTokenProvider(cfg.JWTSecret, ttl)
+
+	// 4. Setup HTTP server and routing
 	srv := server.NewServer()
 
-	// 4. Initialize CoreHR Module
+	// 5. Initialize Auth Module
+	userRepository := authRepo.NewUserRepository(database)
+	authService := authSvc.NewAuthService(userRepository, tp)
+	authHdl := authHandler.NewAuthHandler(authService)
+
+	// Mount Auth Routes
+	authHandler.SetupRoutesFiber(srv.App, authHdl, tp)
+
+	// 6. Initialize CoreHR Module
 	employeeRepo := corehrRepo.NewEmployeeRepository(database)
 	departmentRepo := corehrRepo.NewDepartmentRepository(database)
 	positionRepo := corehrRepo.NewPositionRepository(database)
@@ -70,13 +92,13 @@ func main() {
 	assetAssignmentHdl := corehrHandler.NewAssetAssignmentHandler(assetAssignmentSvc)
 
 	// Mount Core HR Routes
-	corehrHandler.SetupRoutesFiber(srv.App, employeeHdl, departmentHdl, positionHdl, assetHdl, assetAssignmentHdl)
+	corehrHandler.SetupRoutesFiber(srv.App, employeeHdl, departmentHdl, positionHdl, assetHdl, assetAssignmentHdl, tp)
 
 	// 5. Initialize Leave Module
 	leaveRepository := leaveRepo.NewSQLRepository(database)
 	leaveService := leaveSvc.NewLeaveService(leaveRepository, employeeRepo)
 	
-	leaveHandler.SetupRoutesFiber(srv.App, leaveService)
+	leaveHandler.SetupRoutesFiber(srv.App, leaveService, tp)
 
 	log.Printf("Listening and serving HTTP on :%s", cfg.HTTPPort)
 	if err := srv.App.Listen(":" + cfg.HTTPPort); err != nil {

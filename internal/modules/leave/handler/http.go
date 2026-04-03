@@ -3,16 +3,18 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/leave/service"
+	"github.com/thecemakin/hr-project/internal/platform/auth"
+	"github.com/thecemakin/hr-project/internal/platform/http/middleware"
 )
 
 // SetupRoutesFiber configures all the routes for the Leave module using Fiber
-func SetupRoutesFiber(app *fiber.App, svc service.LeaveService) {
+func SetupRoutesFiber(app *fiber.App, svc service.LeaveService, tp *auth.TokenProvider) {
 	leaveTypeHandler := NewLeaveTypeHandler(svc)
 	leaveBalanceHandler := NewLeaveBalanceHandler(svc)
 	leaveRequestHandler := NewLeaveRequestHandler(svc)
 
-	// Create group for Leave routes
-	v1 := app.Group("/api/v1/leave")
+	// Create group for Leave routes and apply authentication
+	v1 := app.Group("/api/v1/leave", middleware.AuthMiddleware(tp))
 
 	// Leave Types
 	v1.Get("/leave-types", leaveTypeHandler.ListLeaveTypes)

@@ -2,6 +2,8 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/thecemakin/hr-project/internal/platform/auth"
+	"github.com/thecemakin/hr-project/internal/platform/http/middleware"
 )
 
 // SetupRoutesFiber configures all the routes for the Core HR module using Fiber
@@ -12,16 +14,17 @@ func SetupRoutesFiber(
 	positionHandler *PositionHandler,
 	assetHandler *AssetHandler,
 	assetAssignmentHandler *AssetAssignmentHandler,
+	tp *auth.TokenProvider,
 ) {
-	// Create group for Core HR routes
-	v1 := app.Group("/api/v1/corehr")
+	// Create group for Core HR routes and apply authentication
+	v1 := app.Group("/api/v1/corehr", middleware.AuthMiddleware(tp))
 
 	// Employees
-	v1.Post("/employees", employeeHandler.CreateEmployee)
+	v1.Post("/employees", middleware.RequireRole("admin", "hr"), employeeHandler.CreateEmployee)
 	v1.Get("/employees", employeeHandler.GetAllEmployees)
 	v1.Get("/employees/:id", employeeHandler.GetEmployeeByID)
-	v1.Put("/employees/:id", employeeHandler.UpdateEmployee)
-	v1.Delete("/employees/:id", employeeHandler.DeleteEmployee)
+	v1.Put("/employees/:id", middleware.RequireRole("admin", "hr"), employeeHandler.UpdateEmployee)
+	v1.Delete("/employees/:id", middleware.RequireRole("admin"), employeeHandler.DeleteEmployee)
 	
 	v1.Get("/employees/email/:email", employeeHandler.GetEmployeeByEmail)
 	v1.Get("/employees/manager/:managerId", employeeHandler.GetEmployeesByManagerID)
