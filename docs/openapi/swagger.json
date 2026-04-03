@@ -2885,6 +2885,43 @@
                     }
                 }
             }
+        },
+        "/api/v1/organization/tree": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve the full company structure in a hierarchical JSON format",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Get organization hierarchy tree",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.OrganizationNode"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -3171,6 +3208,35 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_thecemakin_hr-project_internal_modules_corehr_model.OrganizationNode": {
+            "type": "object",
+            "properties": {
+                "department": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "job_title": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "subordinates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.OrganizationNode"
+                    }
                 }
             }
         },

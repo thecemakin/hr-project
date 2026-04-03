@@ -14,10 +14,15 @@ func SetupRoutesFiber(
 	positionHandler *PositionHandler,
 	assetHandler *AssetHandler,
 	assetAssignmentHandler *AssetAssignmentHandler,
+	organizationHandler *OrganizationHandler,
 	tp *auth.TokenProvider,
 ) {
 	// Create group for Core HR routes and apply authentication
 	v1 := app.Group("/api/v1/corehr", middleware.AuthMiddleware(tp))
+	org := app.Group("/api/v1/organization", middleware.AuthMiddleware(tp))
+
+	// Organization
+	org.Get("/tree", organizationHandler.GetTree)
 
 	// Employees
 	v1.Post("/employees", middleware.RequireRole("admin", "hr"), employeeHandler.CreateEmployee)

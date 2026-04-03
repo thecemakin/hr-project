@@ -95,9 +95,10 @@ func main() {
 	positionHdl := corehrHandler.NewPositionHandler(positionSvc)
 	assetHdl := corehrHandler.NewAssetHandler(assetSvc)
 	assetAssignmentHdl := corehrHandler.NewAssetAssignmentHandler(assetAssignmentSvc)
+	organizationHdl := corehrHandler.NewOrganizationHandler(employeeSvc)
 
 	// Mount Core HR Routes
-	corehrHandler.SetupRoutesFiber(srv.App, employeeHdl, departmentHdl, positionHdl, assetHdl, assetAssignmentHdl, tp)
+	corehrHandler.SetupRoutesFiber(srv.App, employeeHdl, departmentHdl, positionHdl, assetHdl, assetAssignmentHdl, organizationHdl, tp)
 
 	// 5. Initialize Leave Module
 	leaveRepository := leaveRepo.NewSQLRepository(database)

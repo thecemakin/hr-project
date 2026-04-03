@@ -20,6 +20,7 @@ type EmployeeService interface {
 	GetEmployeesByDepartmentID(departmentID uint) ([]*model.Employee, error)
 	GetEmployeesByStatus(status string) ([]*model.Employee, error)
 	ValidateManagerRelationship(employeeID, managerID uint) (bool, error)
+	GetOrganizationTree() ([]*model.OrganizationNode, error)
 }
 
 // employeeService implements the EmployeeService interface
@@ -174,6 +175,56 @@ func (s *employeeService) ValidateManagerRelationship(employeeID, managerID uint
 	// - Checking if the manager has the appropriate role (optional)
 
 	return true, nil
+}
+
+// GetOrganizationTree builds the company hierarchy tree
+func (s *employeeService) GetOrganizationTree() ([]*model.OrganizationNode, error) {
+	// 1. Fetch all employees with preloaded Department and Position
+	// Using a large limit to get everyone for now
+	employees, err := s.repo.GetAll(10000, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Create a map of nodes for quick lookup
+	nodeMap := make(map[uint]*model.OrganizationNode)
+	var roots []*model.OrganizationNode
+
+	for _, emp := range employees {
+		node := &model.OrganizationNode{
+			ID:        emp.ID,
+			FirstName: emp.FirstName,
+			LastName:  emp.LastName,
+			Status:    emp.Status,
+		}
+		
+		if emp.Position != nil {
+			node.JobTitle = emp.Position.Title
+		}
+		if emp.Department != nil {
+			node.Department = emp.Department.Name
+		}
+		
+		nodeMap[emp.ID] = node
+	}
+
+	// 3. Link children to parents
+	for _, emp := range employees {
+		node := nodeMap[emp.ID]
+		if emp.ManagerID == nil || *emp.ManagerID == 0 {
+			roots = append(roots, node)
+		} else {
+			if parent, ok := nodeMap[*emp.ManagerID]; ok {
+				parent.Subordinates = append(parent.Subordinates, node)
+			} else {
+				// If manager not found in current set (rare if we fetch all),
+				// treat it as a root node for now.
+				roots = append(roots, node)
+			}
+		}
+	}
+
+	return roots, nil
 }
 
 // GetByEmployeeNumber retrieves an employee by employee number

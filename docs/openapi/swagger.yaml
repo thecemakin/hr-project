@@ -192,6 +192,25 @@ definitions:
       updated_at:
         type: string
     type: object
+  github_com_thecemakin_hr-project_internal_modules_corehr_model.OrganizationNode:
+    properties:
+      department:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      job_title:
+        type: string
+      last_name:
+        type: string
+      status:
+        type: string
+      subordinates:
+        items:
+          $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.OrganizationNode'
+        type: array
+    type: object
   github_com_thecemakin_hr-project_internal_modules_corehr_model.Position:
     properties:
       code:
@@ -2179,6 +2198,29 @@ paths:
       summary: Get leave type by ID
       tags:
       - Leave Types
+  /api/v1/organization/tree:
+    get:
+      description: Retrieve the full company structure in a hierarchical JSON format
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.OrganizationNode'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get organization hierarchy tree
+      tags:
+      - Organization
 securityDefinitions:
   ApiKeyAuth:
     description: Type "Bearer <your-jwt-token>" to authenticate.
