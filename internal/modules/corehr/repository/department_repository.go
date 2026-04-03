@@ -5,12 +5,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// DepartmentFilter defines the available filters for department list
+type DepartmentFilter struct {
+	Name string
+}
+
 // DepartmentRepository defines the interface for department data operations
 type DepartmentRepository interface {
 	Create(department *model.Department) error
 	GetByID(id uint) (*model.Department, error)
-	GetByName(name string) (*model.Department, error)
-	GetAll(limit, offset int) ([]*model.Department, error)
+	GetAll(limit, offset int, filter DepartmentFilter) ([]*model.Department, error)
 	Update(department *model.Department) error
 	Delete(id uint) error
 }
@@ -42,20 +46,17 @@ func (r *departmentRepository) GetByID(id uint) (*model.Department, error) {
 	return &department, nil
 }
 
-// GetByName retrieves a department by name
-func (r *departmentRepository) GetByName(name string) (*model.Department, error) {
-	var department model.Department
-	err := r.db.Preload("Head").Where("name = ?", name).First(&department).Error
-	if err != nil {
-		return nil, err
-	}
-	return &department, nil
-}
 
-// GetAll retrieves all departments with pagination
-func (r *departmentRepository) GetAll(limit, offset int) ([]*model.Department, error) {
+// GetAll retrieves departments with pagination and optional filtering
+func (r *departmentRepository) GetAll(limit, offset int, filter DepartmentFilter) ([]*model.Department, error) {
 	var departments []*model.Department
-	err := r.db.Preload("Head").Limit(limit).Offset(offset).Find(&departments).Error
+	query := r.db.Preload("Head")
+
+	if filter.Name != "" {
+		query = query.Where("name ILIKE ?", "%"+filter.Name+"%")
+	}
+
+	err := query.Limit(limit).Offset(offset).Find(&departments).Error
 	if err != nil {
 		return nil, err
 	}

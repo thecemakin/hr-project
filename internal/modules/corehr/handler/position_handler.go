@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
+	"github.com/thecemakin/hr-project/internal/modules/corehr/repository"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
 
@@ -92,33 +93,15 @@ func (h *PositionHandler) GetPositionByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(position)
 }
 
-// GetPositionByTitle handles GET /positions/title/:title
-// @Summary Get position by title
-// @Description Get detailed information about a position by its title
-// @Tags Positions
-// @Produce json
-// @Param title path string true "Position Title"
-// @Security ApiKeyAuth
-// @Success 200 {object} model.Position
-// @Failure 404 {object} map[string]string
-// @Router /api/v1/corehr/positions/title/{title} [get]
-func (h *PositionHandler) GetPositionByTitle(c *fiber.Ctx) error {
-	title := c.Params("title")
-	position, err := h.service.GetPositionByTitle(title)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Position not found"})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(position)
-}
 
 // GetAllPositions handles GET /positions
-// @Summary Get all positions
-// @Description Get a list of all positions with pagination
+// @Summary Get positions with filtering
+// @Description Get a list of positions with pagination and optional filters (title)
 // @Tags Positions
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Param title query string false "Filter by title"
 // @Security ApiKeyAuth
 // @Success 200 {array} model.Position
 // @Failure 500 {object} map[string]string
@@ -126,18 +109,23 @@ func (h *PositionHandler) GetPositionByTitle(c *fiber.Ctx) error {
 func (h *PositionHandler) GetAllPositions(c *fiber.Ctx) error {
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
+	title := c.Query("title")
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit < 1 || limit > 100 {
+	limit, _ := strconv.Atoi(limitStr)
+	if limit < 1 || limit > 100 {
 		limit = 10
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
+	offset, _ := strconv.Atoi(offsetStr)
+	if offset < 0 {
 		offset = 0
 	}
 
-	positions, err := h.service.GetAllPositions(limit, offset)
+	filter := repository.PositionFilter{
+		Title: title,
+	}
+
+	positions, err := h.service.GetAllPositions(limit, offset, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

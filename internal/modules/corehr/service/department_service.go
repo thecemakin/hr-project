@@ -12,8 +12,7 @@ import (
 type DepartmentService interface {
 	CreateDepartment(department *model.Department) error
 	GetDepartmentByID(id uint) (*model.Department, error)
-	GetDepartmentByName(name string) (*model.Department, error)
-	GetAllDepartments(limit, offset int) ([]*model.Department, error)
+	GetAllDepartments(limit, offset int, filter repository.DepartmentFilter) ([]*model.Department, error)
 	UpdateDepartment(department *model.Department) error
 	DeleteDepartment(id uint) error
 }
@@ -38,8 +37,9 @@ func (s *departmentService) CreateDepartment(department *model.Department) error
 	}
 
 	// Check if department name already exists
-	existingDept, err := s.repo.GetByName(department.Name)
-	if err == nil && existingDept != nil {
+	nameFilter := repository.DepartmentFilter{Name: department.Name}
+	existingWithName, _ := s.repo.GetAll(1, 0, nameFilter)
+	if len(existingWithName) > 0 {
 		return fmt.Errorf("department with name %s already exists", department.Name)
 	}
 
@@ -58,14 +58,9 @@ func (s *departmentService) GetDepartmentByID(id uint) (*model.Department, error
 	return s.repo.GetByID(id)
 }
 
-// GetDepartmentByName retrieves a department by name
-func (s *departmentService) GetDepartmentByName(name string) (*model.Department, error) {
-	return s.repo.GetByName(name)
-}
-
-// GetAllDepartments retrieves all departments with pagination
-func (s *departmentService) GetAllDepartments(limit, offset int) ([]*model.Department, error) {
-	return s.repo.GetAll(limit, offset)
+// GetAllDepartments retrieves all departments with pagination and optional filtering
+func (s *departmentService) GetAllDepartments(limit, offset int, filter repository.DepartmentFilter) ([]*model.Department, error) {
+	return s.repo.GetAll(limit, offset, filter)
 }
 
 // UpdateDepartment updates an existing department after validation
@@ -83,8 +78,9 @@ func (s *departmentService) UpdateDepartment(department *model.Department) error
 
 	// Check if name is being changed and if it already exists for another department
 	if existingDept.Name != department.Name {
-		nameExists, _ := s.repo.GetByName(department.Name)
-		if nameExists != nil && nameExists.ID != department.ID {
+		nameFilter := repository.DepartmentFilter{Name: department.Name}
+		existingWithName, _ := s.repo.GetAll(1, 0, nameFilter)
+		if len(existingWithName) > 0 && existingWithName[0].ID != department.ID {
 			return fmt.Errorf("department with name %s already exists", department.Name)
 		}
 	}

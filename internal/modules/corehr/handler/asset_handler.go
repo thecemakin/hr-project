@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
+	"github.com/thecemakin/hr-project/internal/modules/corehr/repository"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
 
@@ -98,53 +99,38 @@ func (h *AssetHandler) GetAssetByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(asset)
 }
 
-// GetAssetBySerialNumber handles GET /assets/serial/:serialNumber
-// @Summary Get asset by serial number
-// @Description Get detailed information about an asset by its serial number
-// @Tags Assets
-// @Produce json
-// @Param serialNumber path string true "Serial Number"
-// @Security ApiKeyAuth
-// @Success 200 {object} model.Asset
-// @Failure 404 {object} map[string]string
-// @Router /api/v1/corehr/assets/serial/{serialNumber} [get]
 func (h *AssetHandler) GetAssetBySerialNumber(c *fiber.Ctx) error {
 	serialNumber := c.Params("serialNumber")
-	asset, err := h.service.GetAssetBySerialNumber(serialNumber)
-	if err != nil {
+	filter := repository.AssetFilter{SerialNumber: serialNumber}
+	assets, err := h.service.GetAllAssets(1, 0, filter)
+	if err != nil || len(assets) == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Asset not found"})
 	}
-
-	return c.Status(fiber.StatusOK).JSON(asset)
+	return c.Status(fiber.StatusOK).JSON(assets[0])
 }
 
-// GetAssetByAssetTag handles GET /assets/tag/:assetTag
-// @Summary Get asset by asset tag
-// @Description Get detailed information about an asset by its asset tag
-// @Tags Assets
-// @Produce json
-// @Param assetTag path string true "Asset Tag"
-// @Security ApiKeyAuth
-// @Success 200 {object} model.Asset
-// @Failure 404 {object} map[string]string
-// @Router /api/v1/corehr/assets/tag/{assetTag} [get]
 func (h *AssetHandler) GetAssetByAssetTag(c *fiber.Ctx) error {
 	assetTag := c.Params("assetTag")
-	asset, err := h.service.GetAssetByAssetTag(assetTag)
-	if err != nil {
+	filter := repository.AssetFilter{AssetTag: assetTag}
+	assets, err := h.service.GetAllAssets(1, 0, filter)
+	if err != nil || len(assets) == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Asset not found"})
 	}
-
-	return c.Status(fiber.StatusOK).JSON(asset)
+	return c.Status(fiber.StatusOK).JSON(assets[0])
 }
 
 // GetAllAssets handles GET /assets
-// @Summary Get all assets
-// @Description Get a list of all assets with pagination
+// @Summary Get assets with filtering
+// @Description Get a list of assets with pagination and optional filters (serial_number, asset_tag, status, type, search)
 // @Tags Assets
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Param serial_number query string false "Filter by serial number"
+// @Param asset_tag query string false "Filter by asset tag"
+// @Param status query string false "Filter by status"
+// @Param type query string false "Filter by type"
+// @Param search query string false "Search by brand or model"
 // @Security ApiKeyAuth
 // @Success 200 {array} model.Asset
 // @Failure 500 {object} map[string]string
@@ -152,18 +138,31 @@ func (h *AssetHandler) GetAssetByAssetTag(c *fiber.Ctx) error {
 func (h *AssetHandler) GetAllAssets(c *fiber.Ctx) error {
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
+	serialNumber := c.Query("serial_number")
+	assetTag := c.Query("asset_tag")
+	status := c.Query("status")
+	assetType := c.Query("type")
+	search := c.Query("search")
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit < 1 || limit > 100 {
+	limit, _ := strconv.Atoi(limitStr)
+	if limit < 1 || limit > 100 {
 		limit = 10
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
+	offset, _ := strconv.Atoi(offsetStr)
+	if offset < 0 {
 		offset = 0
 	}
 
-	assets, err := h.service.GetAllAssets(limit, offset)
+	filter := repository.AssetFilter{
+		SerialNumber: serialNumber,
+		AssetTag:     assetTag,
+		Status:       status,
+		Type:         assetType,
+		Search:       search,
+	}
+
+	assets, err := h.service.GetAllAssets(limit, offset, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -227,44 +226,4 @@ func (h *AssetHandler) DeleteAsset(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Asset deleted successfully"})
-}
-
-// GetAssetsByStatus handles GET /assets/status/:status
-// @Summary Get assets by status
-// @Description Get a list of assets with a specific status
-// @Tags Assets
-// @Produce json
-// @Param status path string true "Status (available, assigned, maintenance, retired)"
-// @Security ApiKeyAuth
-// @Success 200 {array} model.Asset
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/corehr/assets/status/{status} [get]
-func (h *AssetHandler) GetAssetsByStatus(c *fiber.Ctx) error {
-	status := c.Params("status")
-	assets, err := h.service.GetAssetsByStatus(status)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(assets)
-}
-
-// GetAssetsByType handles GET /assets/type/:type
-// @Summary Get assets by type
-// @Description Get a list of assets of a specific type
-// @Tags Assets
-// @Produce json
-// @Param type path string true "Asset Type (laptop, phone, tablet, etc.)"
-// @Security ApiKeyAuth
-// @Success 200 {array} model.Asset
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/corehr/assets/type/{type} [get]
-func (h *AssetHandler) GetAssetsByType(c *fiber.Ctx) error {
-	assetType := c.Params("type")
-	assets, err := h.service.GetAssetsByType(assetType)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(assets)
 }

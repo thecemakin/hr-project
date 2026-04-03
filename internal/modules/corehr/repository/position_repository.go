@@ -5,12 +5,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// PositionFilter defines the available filters for position list
+type PositionFilter struct {
+	Title string
+}
+
 // PositionRepository defines the interface for position data operations
 type PositionRepository interface {
 	Create(position *model.Position) error
 	GetByID(id uint) (*model.Position, error)
-	GetByTitle(title string) (*model.Position, error)
-	GetAll(limit, offset int) ([]*model.Position, error)
+	GetAll(limit, offset int, filter PositionFilter) ([]*model.Position, error)
 	Update(position *model.Position) error
 	Delete(id uint) error
 }
@@ -42,20 +46,17 @@ func (r *positionRepository) GetByID(id uint) (*model.Position, error) {
 	return &position, nil
 }
 
-// GetByTitle retrieves a position by title
-func (r *positionRepository) GetByTitle(title string) (*model.Position, error) {
-	var position model.Position
-	err := r.db.Preload("Department").Where("title = ?", title).First(&position).Error
-	if err != nil {
-		return nil, err
-	}
-	return &position, nil
-}
 
-// GetAll retrieves all positions with pagination
-func (r *positionRepository) GetAll(limit, offset int) ([]*model.Position, error) {
+// GetAll retrieves positions with pagination and optional filtering
+func (r *positionRepository) GetAll(limit, offset int, filter PositionFilter) ([]*model.Position, error) {
 	var positions []*model.Position
-	err := r.db.Preload("Department").Limit(limit).Offset(offset).Find(&positions).Error
+	query := r.db.Preload("Department")
+
+	if filter.Title != "" {
+		query = query.Where("title ILIKE ?", "%"+filter.Title+"%")
+	}
+
+	err := query.Limit(limit).Offset(offset).Find(&positions).Error
 	if err != nil {
 		return nil, err
 	}

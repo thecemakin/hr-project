@@ -5,15 +5,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// AssetAssignmentFilter defines available filters for asset assignments
+type AssetAssignmentFilter struct {
+	AssetID    uint
+	EmployeeID uint
+	Status     string // e.g., 'assigned', 'returned'
+}
+
 // AssetAssignmentRepository defines the interface for asset assignment data operations
 type AssetAssignmentRepository interface {
 	Create(assignment *model.AssetAssignment) error
 	GetByID(id uint) (*model.AssetAssignment, error)
-	GetByAssetID(assetID uint) ([]*model.AssetAssignment, error)
-	GetByEmployeeID(employeeID uint) ([]*model.AssetAssignment, error)
-	GetCurrentAssignmentsByEmployeeID(employeeID uint) ([]*model.AssetAssignment, error)
-	GetActiveAssignmentsByAssetID(assetID uint) (*model.AssetAssignment, error)
-	GetAll(limit, offset int) ([]*model.AssetAssignment, error)
+	GetAll(limit, offset int, filter AssetAssignmentFilter) ([]*model.AssetAssignment, error)
 	Update(assignment *model.AssetAssignment) error
 	Delete(id uint) error
 }
@@ -45,50 +48,23 @@ func (r *assetAssignmentRepository) GetByID(id uint) (*model.AssetAssignment, er
 	return &assignment, nil
 }
 
-// GetByAssetID retrieves all assignments for a specific asset
-func (r *assetAssignmentRepository) GetByAssetID(assetID uint) ([]*model.AssetAssignment, error) {
-	var assignments []*model.AssetAssignment
-	err := r.db.Preload("Asset").Preload("Employee").Preload("Assigner").Preload("Returner").Where("asset_id = ?", assetID).Find(&assignments).Error
-	if err != nil {
-		return nil, err
-	}
-	return assignments, nil
-}
 
-// GetByEmployeeID retrieves all assignments for a specific employee
-func (r *assetAssignmentRepository) GetByEmployeeID(employeeID uint) ([]*model.AssetAssignment, error) {
+// GetAll retrieves asset assignments with pagination and optional filtering
+func (r *assetAssignmentRepository) GetAll(limit, offset int, filter AssetAssignmentFilter) ([]*model.AssetAssignment, error) {
 	var assignments []*model.AssetAssignment
-	err := r.db.Preload("Asset").Preload("Employee").Preload("Assigner").Preload("Returner").Where("employee_id = ?", employeeID).Find(&assignments).Error
-	if err != nil {
-		return nil, err
-	}
-	return assignments, nil
-}
+	query := r.db.Preload("Asset").Preload("Employee").Preload("Assigner").Preload("Returner")
 
-// GetCurrentAssignmentsByEmployeeID retrieves all current (non-returned) assignments for a specific employee
-func (r *assetAssignmentRepository) GetCurrentAssignmentsByEmployeeID(employeeID uint) ([]*model.AssetAssignment, error) {
-	var assignments []*model.AssetAssignment
-	err := r.db.Preload("Asset").Preload("Employee").Preload("Assigner").Preload("Returner").Where("employee_id = ? AND status = 'assigned'", employeeID).Find(&assignments).Error
-	if err != nil {
-		return nil, err
+	if filter.AssetID != 0 {
+		query = query.Where("asset_id = ?", filter.AssetID)
 	}
-	return assignments, nil
-}
-
-// GetActiveAssignmentsByAssetID retrieves the currently active assignment for a specific asset
-func (r *assetAssignmentRepository) GetActiveAssignmentsByAssetID(assetID uint) (*model.AssetAssignment, error) {
-	var assignment model.AssetAssignment
-	err := r.db.Preload("Asset").Preload("Employee").Preload("Assigner").Preload("Returner").Where("asset_id = ? AND status = 'assigned'", assetID).First(&assignment).Error
-	if err != nil {
-		return nil, err
+	if filter.EmployeeID != 0 {
+		query = query.Where("employee_id = ?", filter.EmployeeID)
 	}
-	return &assignment, nil
-}
+	if filter.Status != "" {
+		query = query.Where("status = ?", filter.Status)
+	}
 
-// GetAll retrieves all asset assignments with pagination
-func (r *assetAssignmentRepository) GetAll(limit, offset int) ([]*model.AssetAssignment, error) {
-	var assignments []*model.AssetAssignment
-	err := r.db.Preload("Asset").Preload("Employee").Preload("Assigner").Preload("Returner").Limit(limit).Offset(offset).Find(&assignments).Error
+	err := query.Limit(limit).Offset(offset).Find(&assignments).Error
 	if err != nil {
 		return nil, err
 	}

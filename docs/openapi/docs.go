@@ -125,14 +125,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a list of all asset assignments with pagination",
+                "description": "Get a list of all asset assignments with pagination and optional filters (asset_id, employee_id, status)",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Asset Assignments"
                 ],
-                "summary": "Get all asset assignments",
+                "summary": "Get asset assignments with filtering",
                 "parameters": [
                     {
                         "type": "integer",
@@ -146,6 +146,24 @@ const docTemplate = `{
                         "default": 0,
                         "description": "Offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by asset ID",
+                        "name": "asset_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by employee ID",
+                        "name": "employee_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
                         "in": "query"
                     }
                 ],
@@ -205,223 +223,6 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/asset-assignments/active/asset/{assetId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get the current active assignment for a specific asset",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Asset Assignments"
-                ],
-                "summary": "Get active assignment by asset ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Asset ID",
-                        "name": "assetId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/asset-assignments/asset/{assetId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all assignment history for a specific asset",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Asset Assignments"
-                ],
-                "summary": "Get asset assignments by asset ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Asset ID",
-                        "name": "assetId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/asset-assignments/current/employee/{employeeId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get only the currently active asset assignments for a specific employee",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Asset Assignments"
-                ],
-                "summary": "Get current active assignments by employee ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Employee ID",
-                        "name": "employeeId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/asset-assignments/employee/{employeeId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all assignment history for a specific employee",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Asset Assignments"
-                ],
-                "summary": "Get asset assignments by employee ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Employee ID",
-                        "name": "employeeId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment"
                             }
                         }
                     },
@@ -623,14 +424,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a list of all assets with pagination",
+                "description": "Get a list of assets with pagination and optional filters (serial_number, asset_tag, status, type, search)",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Assets"
                 ],
-                "summary": "Get all assets",
+                "summary": "Get assets with filtering",
                 "parameters": [
                     {
                         "type": "integer",
@@ -644,6 +445,36 @@ const docTemplate = `{
                         "default": 0,
                         "description": "Offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by serial number",
+                        "name": "serial_number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by asset tag",
+                        "name": "asset_tag",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by type",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by brand or model",
+                        "name": "search",
                         "in": "query"
                     }
                 ],
@@ -772,184 +603,6 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/assets/serial/{serialNumber}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get detailed information about an asset by its serial number",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Assets"
-                ],
-                "summary": "Get asset by serial number",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Serial Number",
-                        "name": "serialNumber",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/assets/status/{status}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get a list of assets with a specific status",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Assets"
-                ],
-                "summary": "Get assets by status",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Status (available, assigned, maintenance, retired)",
-                        "name": "status",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/assets/tag/{assetTag}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get detailed information about an asset by its asset tag",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Assets"
-                ],
-                "summary": "Get asset by asset tag",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Asset Tag",
-                        "name": "assetTag",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/assets/type/{type}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get a list of assets of a specific type",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Assets"
-                ],
-                "summary": "Get assets by type",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Asset Type (laptop, phone, tablet, etc.)",
-                        "name": "type",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset"
                             }
                         }
                     },
@@ -1209,14 +862,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a list of all departments with pagination",
+                "description": "Get a list of departments with pagination and optional filters (name)",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Departments"
                 ],
-                "summary": "Get all departments",
+                "summary": "Get departments with filtering",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1230,6 +883,12 @@ const docTemplate = `{
                         "default": 0,
                         "description": "Offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by name",
+                        "name": "name",
                         "in": "query"
                     }
                 ],
@@ -1303,49 +962,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/departments/name/{name}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get detailed information about a department by its unique name",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Departments"
-                ],
-                "summary": "Get department by name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Department Name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1533,14 +1149,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a list of all employees with pagination",
+                "description": "Get a list of employees with pagination and optional filters (email, status, department_id, manager_id, search)",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Employees"
                 ],
-                "summary": "Get all employees",
+                "summary": "Get employees with filtering",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1554,6 +1170,36 @@ const docTemplate = `{
                         "default": 0,
                         "description": "Offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by email",
+                        "name": "email",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by department ID",
+                        "name": "department_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by manager ID",
+                        "name": "manager_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by name",
+                        "name": "search",
                         "in": "query"
                     }
                 ],
@@ -1622,205 +1268,6 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/employees/department/{departmentId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get a list of employees in a specific department",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Get employees by department ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Department ID",
-                        "name": "departmentId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/employees/email/{email}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get detailed information about an employee by their email address",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Get employee by email",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Employee Email",
-                        "name": "email",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/employees/manager/{managerId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get a list of employees reporting to a specific manager",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Get employees by manager ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Manager ID",
-                        "name": "managerId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/employees/status/{status}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get a list of employees with a specific employment status",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Get employees by status",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Status (active, inactive, terminated)",
-                        "name": "status",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee"
                             }
                         }
                     },
@@ -2013,14 +1460,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a list of all positions with pagination",
+                "description": "Get a list of positions with pagination and optional filters (title)",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Positions"
                 ],
-                "summary": "Get all positions",
+                "summary": "Get positions with filtering",
                 "parameters": [
                     {
                         "type": "integer",
@@ -2034,6 +1481,12 @@ const docTemplate = `{
                         "default": 0,
                         "description": "Offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by title",
+                        "name": "title",
                         "in": "query"
                     }
                 ],
@@ -2107,49 +1560,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/corehr/positions/title/{title}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get detailed information about a position by its title",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Positions"
-                ],
-                "summary": "Get position by title",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Position Title",
-                        "name": "title",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Position"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

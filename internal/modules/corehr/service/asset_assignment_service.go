@@ -13,11 +13,8 @@ import (
 type AssetAssignmentService interface {
 	CreateAssetAssignment(assignment *model.AssetAssignment) error
 	GetAssetAssignmentByID(id uint) (*model.AssetAssignment, error)
-	GetAssetAssignmentsByAssetID(assetID uint) ([]*model.AssetAssignment, error)
-	GetAssetAssignmentsByEmployeeID(employeeID uint) ([]*model.AssetAssignment, error)
-	GetCurrentAssignmentsByEmployeeID(employeeID uint) ([]*model.AssetAssignment, error)
 	GetActiveAssignmentByAssetID(assetID uint) (*model.AssetAssignment, error)
-	GetAllAssetAssignments(limit, offset int) ([]*model.AssetAssignment, error)
+	GetAllAssetAssignments(limit, offset int, filter repository.AssetAssignmentFilter) ([]*model.AssetAssignment, error)
 	UpdateAssetAssignment(assignment *model.AssetAssignment) error
 	DeleteAssetAssignment(id uint) error
 	AssignAsset(assetID, employeeID, assignedByID uint, notes string) error
@@ -70,7 +67,7 @@ func (s *assetAssignmentService) CreateAssetAssignment(assignment *model.AssetAs
 	}
 
 	// Check if asset is available for assignment (not already assigned)
-	activeAssignment, err := s.repo.GetActiveAssignmentsByAssetID(assignment.AssetID)
+	activeAssignment, err := s.GetActiveAssignmentByAssetID(assignment.AssetID)
 	if err == nil && activeAssignment != nil {
 		return fmt.Errorf("asset with ID %d is already assigned to employee with ID %d", assignment.AssetID, activeAssignment.EmployeeID)
 	}
@@ -94,29 +91,19 @@ func (s *assetAssignmentService) GetAssetAssignmentByID(id uint) (*model.AssetAs
 	return s.repo.GetByID(id)
 }
 
-// GetAssetAssignmentsByAssetID retrieves all assignments for a specific asset
-func (s *assetAssignmentService) GetAssetAssignmentsByAssetID(assetID uint) ([]*model.AssetAssignment, error) {
-	return s.repo.GetByAssetID(assetID)
-}
-
-// GetAssetAssignmentsByEmployeeID retrieves all assignments for a specific employee
-func (s *assetAssignmentService) GetAssetAssignmentsByEmployeeID(employeeID uint) ([]*model.AssetAssignment, error) {
-	return s.repo.GetByEmployeeID(employeeID)
-}
-
-// GetCurrentAssignmentsByEmployeeID retrieves all current (non-returned) assignments for a specific employee
-func (s *assetAssignmentService) GetCurrentAssignmentsByEmployeeID(employeeID uint) ([]*model.AssetAssignment, error) {
-	return s.repo.GetCurrentAssignmentsByEmployeeID(employeeID)
-}
-
 // GetActiveAssignmentByAssetID retrieves the currently active assignment for a specific asset
 func (s *assetAssignmentService) GetActiveAssignmentByAssetID(assetID uint) (*model.AssetAssignment, error) {
-	return s.repo.GetActiveAssignmentsByAssetID(assetID)
+	filter := repository.AssetAssignmentFilter{AssetID: assetID, Status: "assigned"}
+	assignments, err := s.repo.GetAll(1, 0, filter)
+	if err != nil || len(assignments) == 0 {
+		return nil, errors.New("no active assignment found")
+	}
+	return assignments[0], nil
 }
 
-// GetAllAssetAssignments retrieves all asset assignments with pagination
-func (s *assetAssignmentService) GetAllAssetAssignments(limit, offset int) ([]*model.AssetAssignment, error) {
-	return s.repo.GetAll(limit, offset)
+// GetAllAssetAssignments retrieves all asset assignments with pagination and optional filtering
+func (s *assetAssignmentService) GetAllAssetAssignments(limit, offset int, filter repository.AssetAssignmentFilter) ([]*model.AssetAssignment, error) {
+	return s.repo.GetAll(limit, offset, filter)
 }
 
 // UpdateAssetAssignment updates an existing asset assignment after validation
@@ -170,7 +157,7 @@ func (s *assetAssignmentService) AssignAsset(assetID, employeeID, assignedByID u
 	}
 
 	// Check if asset is available for assignment (not already assigned)
-	activeAssignment, err := s.repo.GetActiveAssignmentsByAssetID(assetID)
+	activeAssignment, err := s.GetActiveAssignmentByAssetID(assetID)
 	if err == nil && activeAssignment != nil {
 		return fmt.Errorf("asset with ID %d is already assigned to employee with ID %d", assetID, activeAssignment.EmployeeID)
 	}

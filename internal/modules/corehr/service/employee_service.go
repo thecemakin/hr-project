@@ -13,12 +13,9 @@ type EmployeeService interface {
 	CreateEmployee(employee *model.Employee) error
 	GetEmployeeByID(id uint) (*model.Employee, error)
 	GetEmployeeByEmail(email string) (*model.Employee, error)
-	GetAllEmployees(limit, offset int) ([]*model.Employee, error)
+	GetAllEmployees(limit, offset int, filter repository.EmployeeFilter) ([]*model.Employee, error)
 	UpdateEmployee(employee *model.Employee) error
 	DeleteEmployee(id uint) error
-	GetEmployeesByManagerID(managerID uint) ([]*model.Employee, error)
-	GetEmployeesByDepartmentID(departmentID uint) ([]*model.Employee, error)
-	GetEmployeesByStatus(status string) ([]*model.Employee, error)
 	ValidateManagerRelationship(employeeID, managerID uint) (bool, error)
 	GetOrganizationTree() ([]*model.OrganizationNode, error)
 }
@@ -79,9 +76,9 @@ func (s *employeeService) GetEmployeeByEmail(email string) (*model.Employee, err
 	return s.repo.GetByEmail(email)
 }
 
-// GetAllEmployees retrieves all employees with pagination
-func (s *employeeService) GetAllEmployees(limit, offset int) ([]*model.Employee, error) {
-	return s.repo.GetAll(limit, offset)
+// GetAllEmployees retrieves all employees with pagination and optional filtering
+func (s *employeeService) GetAllEmployees(limit, offset int, filter repository.EmployeeFilter) ([]*model.Employee, error) {
+	return s.repo.GetAll(limit, offset, filter)
 }
 
 // UpdateEmployee updates an existing employee after validation
@@ -141,20 +138,6 @@ func (s *employeeService) DeleteEmployee(id uint) error {
 	return s.repo.Delete(id)
 }
 
-// GetEmployeesByManagerID retrieves all employees reporting to a specific manager
-func (s *employeeService) GetEmployeesByManagerID(managerID uint) ([]*model.Employee, error) {
-	return s.repo.GetByManagerID(managerID)
-}
-
-// GetEmployeesByDepartmentID retrieves all employees in a specific department
-func (s *employeeService) GetEmployeesByDepartmentID(departmentID uint) ([]*model.Employee, error) {
-	return s.repo.GetByDepartmentID(departmentID)
-}
-
-// GetEmployeesByStatus retrieves all employees with a specific status
-func (s *employeeService) GetEmployeesByStatus(status string) ([]*model.Employee, error) {
-	return s.repo.GetByStatus(status)
-}
 
 // ValidateManagerRelationship checks if an employee can report to a specific manager
 // This prevents circular references and self-management
@@ -180,8 +163,8 @@ func (s *employeeService) ValidateManagerRelationship(employeeID, managerID uint
 // GetOrganizationTree builds the company hierarchy tree
 func (s *employeeService) GetOrganizationTree() ([]*model.OrganizationNode, error) {
 	// 1. Fetch all employees with preloaded Department and Position
-	// Using a large limit to get everyone for now
-	employees, err := s.repo.GetAll(10000, 0)
+	// Using a large limit and empty filter to get everyone for now
+	employees, err := s.repo.GetAll(10000, 0, repository.EmployeeFilter{})
 	if err != nil {
 		return nil, err
 	}

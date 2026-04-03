@@ -429,7 +429,8 @@ paths:
       - Auth
   /api/v1/corehr/asset-assignments:
     get:
-      description: Get a list of all asset assignments with pagination
+      description: Get a list of all asset assignments with pagination and optional
+        filters (asset_id, employee_id, status)
       parameters:
       - default: 10
         description: Limit
@@ -441,6 +442,18 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: Filter by asset ID
+        in: query
+        name: asset_id
+        type: integer
+      - description: Filter by employee ID
+        in: query
+        name: employee_id
+        type: integer
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
@@ -458,7 +471,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get all asset assignments
+      summary: Get asset assignments with filtering
       tags:
       - Asset Assignments
     post:
@@ -607,148 +620,10 @@ paths:
       summary: Update an asset assignment
       tags:
       - Asset Assignments
-  /api/v1/corehr/asset-assignments/active/asset/{assetId}:
-    get:
-      description: Get the current active assignment for a specific asset
-      parameters:
-      - description: Asset ID
-        in: path
-        name: assetId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get active assignment by asset ID
-      tags:
-      - Asset Assignments
-  /api/v1/corehr/asset-assignments/asset/{assetId}:
-    get:
-      description: Get all assignment history for a specific asset
-      parameters:
-      - description: Asset ID
-        in: path
-        name: assetId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get asset assignments by asset ID
-      tags:
-      - Asset Assignments
-  /api/v1/corehr/asset-assignments/current/employee/{employeeId}:
-    get:
-      description: Get only the currently active asset assignments for a specific
-        employee
-      parameters:
-      - description: Employee ID
-        in: path
-        name: employeeId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get current active assignments by employee ID
-      tags:
-      - Asset Assignments
-  /api/v1/corehr/asset-assignments/employee/{employeeId}:
-    get:
-      description: Get all assignment history for a specific employee
-      parameters:
-      - description: Employee ID
-        in: path
-        name: employeeId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.AssetAssignment'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get asset assignments by employee ID
-      tags:
-      - Asset Assignments
   /api/v1/corehr/assets:
     get:
-      description: Get a list of all assets with pagination
+      description: Get a list of assets with pagination and optional filters (serial_number,
+        asset_tag, status, type, search)
       parameters:
       - default: 10
         description: Limit
@@ -760,6 +635,26 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: Filter by serial number
+        in: query
+        name: serial_number
+        type: string
+      - description: Filter by asset tag
+        in: query
+        name: asset_tag
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Filter by type
+        in: query
+        name: type
+        type: string
+      - description: Search by brand or model
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
@@ -777,7 +672,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get all assets
+      summary: Get assets with filtering
       tags:
       - Assets
     post:
@@ -1007,121 +902,10 @@ paths:
       summary: Assign an asset to an employee (convenience)
       tags:
       - Assets
-  /api/v1/corehr/assets/serial/{serialNumber}:
-    get:
-      description: Get detailed information about an asset by its serial number
-      parameters:
-      - description: Serial Number
-        in: path
-        name: serialNumber
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get asset by serial number
-      tags:
-      - Assets
-  /api/v1/corehr/assets/status/{status}:
-    get:
-      description: Get a list of assets with a specific status
-      parameters:
-      - description: Status (available, assigned, maintenance, retired)
-        in: path
-        name: status
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get assets by status
-      tags:
-      - Assets
-  /api/v1/corehr/assets/tag/{assetTag}:
-    get:
-      description: Get detailed information about an asset by its asset tag
-      parameters:
-      - description: Asset Tag
-        in: path
-        name: assetTag
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get asset by asset tag
-      tags:
-      - Assets
-  /api/v1/corehr/assets/type/{type}:
-    get:
-      description: Get a list of assets of a specific type
-      parameters:
-      - description: Asset Type (laptop, phone, tablet, etc.)
-        in: path
-        name: type
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Asset'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get assets by type
-      tags:
-      - Assets
   /api/v1/corehr/departments:
     get:
-      description: Get a list of all departments with pagination
+      description: Get a list of departments with pagination and optional filters
+        (name)
       parameters:
       - default: 10
         description: Limit
@@ -1133,6 +917,10 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: Filter by name
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:
@@ -1150,7 +938,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get all departments
+      summary: Get departments with filtering
       tags:
       - Departments
     post:
@@ -1299,36 +1087,10 @@ paths:
       summary: Update a department
       tags:
       - Departments
-  /api/v1/corehr/departments/name/{name}:
-    get:
-      description: Get detailed information about a department by its unique name
-      parameters:
-      - description: Department Name
-        in: path
-        name: name
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Department'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get department by name
-      tags:
-      - Departments
   /api/v1/corehr/employees:
     get:
-      description: Get a list of all employees with pagination
+      description: Get a list of employees with pagination and optional filters (email,
+        status, department_id, manager_id, search)
       parameters:
       - default: 10
         description: Limit
@@ -1340,6 +1102,26 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: Filter by email
+        in: query
+        name: email
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Filter by department ID
+        in: query
+        name: department_id
+        type: integer
+      - description: Filter by manager ID
+        in: query
+        name: manager_id
+        type: integer
+      - description: Search by name
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
@@ -1357,7 +1139,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get all employees
+      summary: Get employees with filtering
       tags:
       - Employees
     post:
@@ -1506,135 +1288,9 @@ paths:
       summary: Update an employee
       tags:
       - Employees
-  /api/v1/corehr/employees/department/{departmentId}:
-    get:
-      description: Get a list of employees in a specific department
-      parameters:
-      - description: Department ID
-        in: path
-        name: departmentId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get employees by department ID
-      tags:
-      - Employees
-  /api/v1/corehr/employees/email/{email}:
-    get:
-      description: Get detailed information about an employee by their email address
-      parameters:
-      - description: Employee Email
-        in: path
-        name: email
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get employee by email
-      tags:
-      - Employees
-  /api/v1/corehr/employees/manager/{managerId}:
-    get:
-      description: Get a list of employees reporting to a specific manager
-      parameters:
-      - description: Manager ID
-        in: path
-        name: managerId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get employees by manager ID
-      tags:
-      - Employees
-  /api/v1/corehr/employees/status/{status}:
-    get:
-      description: Get a list of employees with a specific employment status
-      parameters:
-      - description: Status (active, inactive, terminated)
-        in: path
-        name: status
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Employee'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get employees by status
-      tags:
-      - Employees
   /api/v1/corehr/positions:
     get:
-      description: Get a list of all positions with pagination
+      description: Get a list of positions with pagination and optional filters (title)
       parameters:
       - default: 10
         description: Limit
@@ -1646,6 +1302,10 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: Filter by title
+        in: query
+        name: title
+        type: string
       produces:
       - application/json
       responses:
@@ -1663,7 +1323,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get all positions
+      summary: Get positions with filtering
       tags:
       - Positions
     post:
@@ -1810,33 +1470,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a position
-      tags:
-      - Positions
-  /api/v1/corehr/positions/title/{title}:
-    get:
-      description: Get detailed information about a position by its title
-      parameters:
-      - description: Position Title
-        in: path
-        name: title
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_thecemakin_hr-project_internal_modules_corehr_model.Position'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get position by title
       tags:
       - Positions
   /api/v1/leave/leave-balances/{employeeId}:

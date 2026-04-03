@@ -12,13 +12,9 @@ import (
 type AssetService interface {
 	CreateAsset(asset *model.Asset) error
 	GetAssetByID(id uint) (*model.Asset, error)
-	GetAssetBySerialNumber(serialNumber string) (*model.Asset, error)
-	GetAssetByAssetTag(assetTag string) (*model.Asset, error)
-	GetAllAssets(limit, offset int) ([]*model.Asset, error)
+	GetAllAssets(limit, offset int, filter repository.AssetFilter) ([]*model.Asset, error)
 	UpdateAsset(asset *model.Asset) error
 	DeleteAsset(id uint) error
-	GetAssetsByStatus(status string) ([]*model.Asset, error)
-	GetAssetsByType(assetType string) ([]*model.Asset, error)
 }
 
 // assetService implements the AssetService interface
@@ -41,15 +37,17 @@ func (s *assetService) CreateAsset(asset *model.Asset) error {
 	}
 
 	// Check if serial number already exists
-	existingAsset, err := s.repo.GetBySerialNumber(asset.SerialNumber)
-	if err == nil && existingAsset != nil {
+	snFilter := repository.AssetFilter{SerialNumber: asset.SerialNumber}
+	existingSn, _ := s.repo.GetAll(1, 0, snFilter)
+	if len(existingSn) > 0 {
 		return fmt.Errorf("asset with serial number %s already exists", asset.SerialNumber)
 	}
 
 	// Check if asset tag is provided and if it already exists
 	if asset.AssetTag != "" {
-		existingAsset, err = s.repo.GetByAssetTag(asset.AssetTag)
-		if err == nil && existingAsset != nil {
+		atFilter := repository.AssetFilter{AssetTag: asset.AssetTag}
+		existingTag, _ := s.repo.GetAll(1, 0, atFilter)
+		if len(existingTag) > 0 {
 			return fmt.Errorf("asset with tag %s already exists", asset.AssetTag)
 		}
 	}
@@ -63,19 +61,10 @@ func (s *assetService) GetAssetByID(id uint) (*model.Asset, error) {
 	return s.repo.GetByID(id)
 }
 
-// GetAssetBySerialNumber retrieves an asset by serial number
-func (s *assetService) GetAssetBySerialNumber(serialNumber string) (*model.Asset, error) {
-	return s.repo.GetBySerialNumber(serialNumber)
-}
 
-// GetAssetByAssetTag retrieves an asset by asset tag
-func (s *assetService) GetAssetByAssetTag(assetTag string) (*model.Asset, error) {
-	return s.repo.GetByAssetTag(assetTag)
-}
-
-// GetAllAssets retrieves all assets with pagination
-func (s *assetService) GetAllAssets(limit, offset int) ([]*model.Asset, error) {
-	return s.repo.GetAll(limit, offset)
+// GetAllAssets retrieves all assets with pagination and optional filtering
+func (s *assetService) GetAllAssets(limit, offset int, filter repository.AssetFilter) ([]*model.Asset, error) {
+	return s.repo.GetAll(limit, offset, filter)
 }
 
 // UpdateAsset updates an existing asset after validation
@@ -93,16 +82,18 @@ func (s *assetService) UpdateAsset(asset *model.Asset) error {
 
 	// Check if serial number is being changed and if it already exists for another asset
 	if existingAsset.SerialNumber != asset.SerialNumber {
-		serialExists, _ := s.repo.GetBySerialNumber(asset.SerialNumber)
-		if serialExists != nil && serialExists.ID != asset.ID {
+		snFilter := repository.AssetFilter{SerialNumber: asset.SerialNumber}
+		existingSn, _ := s.repo.GetAll(1, 0, snFilter)
+		if len(existingSn) > 0 && existingSn[0].ID != asset.ID {
 			return fmt.Errorf("asset with serial number %s already exists", asset.SerialNumber)
 		}
 	}
 
 	// Check if asset tag is being changed and if it already exists for another asset
 	if existingAsset.AssetTag != asset.AssetTag && asset.AssetTag != "" {
-		tagExists, _ := s.repo.GetByAssetTag(asset.AssetTag)
-		if tagExists != nil && tagExists.ID != asset.ID {
+		atFilter := repository.AssetFilter{AssetTag: asset.AssetTag}
+		existingTag, _ := s.repo.GetAll(1, 0, atFilter)
+		if len(existingTag) > 0 && existingTag[0].ID != asset.ID {
 			return fmt.Errorf("asset with tag %s already exists", asset.AssetTag)
 		}
 	}
@@ -122,14 +113,4 @@ func (s *assetService) DeleteAsset(id uint) error {
 	// TODO: Check if asset has any active assignments before deletion
 	// For now, just delete the asset
 	return s.repo.Delete(id)
-}
-
-// GetAssetsByStatus retrieves all assets with a specific status
-func (s *assetService) GetAssetsByStatus(status string) ([]*model.Asset, error) {
-	return s.repo.GetByStatus(status)
-}
-
-// GetAssetsByType retrieves all assets of a specific type
-func (s *assetService) GetAssetsByType(assetType string) ([]*model.Asset, error) {
-	return s.repo.GetByType(assetType)
 }

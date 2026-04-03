@@ -5,17 +5,22 @@ import (
 	"gorm.io/gorm"
 )
 
+// AssetFilter defines available filters for asset list
+type AssetFilter struct {
+	SerialNumber string
+	AssetTag     string
+	Status       string
+	Type         string
+	Search       string // For general brand/model search
+}
+
 // AssetRepository defines the interface for asset data operations
 type AssetRepository interface {
 	Create(asset *model.Asset) error
 	GetByID(id uint) (*model.Asset, error)
-	GetBySerialNumber(serialNumber string) (*model.Asset, error)
-	GetByAssetTag(assetTag string) (*model.Asset, error)
-	GetAll(limit, offset int) ([]*model.Asset, error)
+	GetAll(limit, offset int, filter AssetFilter) ([]*model.Asset, error)
 	Update(asset *model.Asset) error
 	Delete(id uint) error
-	GetByStatus(status string) ([]*model.Asset, error)
-	GetByType(assetType string) ([]*model.Asset, error)
 }
 
 // assetRepository implements the AssetRepository interface
@@ -45,30 +50,30 @@ func (r *assetRepository) GetByID(id uint) (*model.Asset, error) {
 	return &asset, nil
 }
 
-// GetBySerialNumber retrieves an asset by serial number
-func (r *assetRepository) GetBySerialNumber(serialNumber string) (*model.Asset, error) {
-	var asset model.Asset
-	err := r.db.Preload("Assignments").Preload("Assignments.Employee").Where("serial_number = ?", serialNumber).First(&asset).Error
-	if err != nil {
-		return nil, err
-	}
-	return &asset, nil
-}
 
-// GetByAssetTag retrieves an asset by asset tag
-func (r *assetRepository) GetByAssetTag(assetTag string) (*model.Asset, error) {
-	var asset model.Asset
-	err := r.db.Preload("Assignments").Preload("Assignments.Employee").Where("asset_tag = ?", assetTag).First(&asset).Error
-	if err != nil {
-		return nil, err
-	}
-	return &asset, nil
-}
-
-// GetAll retrieves all assets with pagination
-func (r *assetRepository) GetAll(limit, offset int) ([]*model.Asset, error) {
+// GetAll retrieves assets with pagination and optional filtering
+func (r *assetRepository) GetAll(limit, offset int, filter AssetFilter) ([]*model.Asset, error) {
 	var assets []*model.Asset
-	err := r.db.Preload("Assignments").Preload("Assignments.Employee").Limit(limit).Offset(offset).Find(&assets).Error
+	query := r.db.Preload("Assignments").Preload("Assignments.Employee")
+
+	if filter.SerialNumber != "" {
+		query = query.Where("serial_number = ?", filter.SerialNumber)
+	}
+	if filter.AssetTag != "" {
+		query = query.Where("asset_tag = ?", filter.AssetTag)
+	}
+	if filter.Status != "" {
+		query = query.Where("status = ?", filter.Status)
+	}
+	if filter.Type != "" {
+		query = query.Where("type = ?", filter.Type)
+	}
+	if filter.Search != "" {
+		searchTerm := "%" + filter.Search + "%"
+		query = query.Where("brand ILIKE ? OR model ILIKE ?", searchTerm, searchTerm)
+	}
+
+	err := query.Limit(limit).Offset(offset).Find(&assets).Error
 	if err != nil {
 		return nil, err
 	}

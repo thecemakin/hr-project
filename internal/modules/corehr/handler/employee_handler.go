@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
+	"github.com/thecemakin/hr-project/internal/modules/corehr/repository"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
 
@@ -121,16 +122,6 @@ func (h *EmployeeHandler) GetEmployeeByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(employee)
 }
 
-// GetEmployeeByEmail handles GET /employees/email/:email
-// @Summary Get employee by email
-// @Description Get detailed information about an employee by their email address
-// @Tags Employees
-// @Produce json
-// @Param email path string true "Employee Email"
-// @Security ApiKeyAuth
-// @Success 200 {object} model.Employee
-// @Failure 404 {object} map[string]string
-// @Router /api/v1/corehr/employees/email/{email} [get]
 func (h *EmployeeHandler) GetEmployeeByEmail(c *fiber.Ctx) error {
 	email := c.Params("email")
 	employee, err := h.service.GetEmployeeByEmail(email)
@@ -141,12 +132,17 @@ func (h *EmployeeHandler) GetEmployeeByEmail(c *fiber.Ctx) error {
 }
 
 // GetAllEmployees handles GET /employees
-// @Summary Get all employees
-// @Description Get a list of all employees with pagination
+// @Summary Get employees with filtering
+// @Description Get a list of employees with pagination and optional filters (email, status, department_id, manager_id, search)
 // @Tags Employees
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Param email query string false "Filter by email"
+// @Param status query string false "Filter by status"
+// @Param department_id query int false "Filter by department ID"
+// @Param manager_id query int false "Filter by manager ID"
+// @Param search query string false "Search by name"
 // @Security ApiKeyAuth
 // @Success 200 {array} model.Employee
 // @Failure 500 {object} map[string]string
@@ -154,17 +150,43 @@ func (h *EmployeeHandler) GetEmployeeByEmail(c *fiber.Ctx) error {
 func (h *EmployeeHandler) GetAllEmployees(c *fiber.Ctx) error {
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
+	email := c.Query("email")
+	status := c.Query("status")
+	deptIDStr := c.Query("department_id")
+	mgrIDStr := c.Query("manager_id")
+	search := c.Query("search")
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit < 1 || limit > 100 {
+	limit, _ := strconv.Atoi(limitStr)
+	if limit < 1 || limit > 100 {
 		limit = 10
 	}
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
+	offset, _ := strconv.Atoi(offsetStr)
+	if offset < 0 {
 		offset = 0
 	}
 
-	employees, err := h.service.GetAllEmployees(limit, offset)
+	filter := repository.EmployeeFilter{
+		Email:  email,
+		Status: status,
+		Search: search,
+	}
+
+	if deptIDStr != "" {
+		id, err := strconv.ParseUint(deptIDStr, 10, 32)
+		if err == nil {
+			uID := uint(id)
+			filter.DepartmentID = &uID
+		}
+	}
+	if mgrIDStr != "" {
+		id, err := strconv.ParseUint(mgrIDStr, 10, 32)
+		if err == nil {
+			uID := uint(id)
+			filter.ManagerID = &uID
+		}
+	}
+
+	employees, err := h.service.GetAllEmployees(limit, offset, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -225,71 +247,4 @@ func (h *EmployeeHandler) DeleteEmployee(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Employee deleted successfully"})
-}
-
-// GetEmployeesByManagerID handles GET /employees/manager/:managerId
-// @Summary Get employees by manager ID
-// @Description Get a list of employees reporting to a specific manager
-// @Tags Employees
-// @Produce json
-// @Param managerId path int true "Manager ID"
-// @Security ApiKeyAuth
-// @Success 200 {array} model.Employee
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/corehr/employees/manager/{managerId} [get]
-func (h *EmployeeHandler) GetEmployeesByManagerID(c *fiber.Ctx) error {
-	idParam := c.Params("managerId")
-	id, err := strconv.ParseUint(idParam, 10, 32)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid manager ID"})
-	}
-	employees, err := h.service.GetEmployeesByManagerID(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-	return c.Status(fiber.StatusOK).JSON(employees)
-}
-
-// GetEmployeesByDepartmentID handles GET /employees/department/:departmentId
-// @Summary Get employees by department ID
-// @Description Get a list of employees in a specific department
-// @Tags Employees
-// @Produce json
-// @Param departmentId path int true "Department ID"
-// @Security ApiKeyAuth
-// @Success 200 {array} model.Employee
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/corehr/employees/department/{departmentId} [get]
-func (h *EmployeeHandler) GetEmployeesByDepartmentID(c *fiber.Ctx) error {
-	idParam := c.Params("departmentId")
-	id, err := strconv.ParseUint(idParam, 10, 32)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid department ID"})
-	}
-	employees, err := h.service.GetEmployeesByDepartmentID(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-	return c.Status(fiber.StatusOK).JSON(employees)
-}
-
-// GetEmployeesByStatus handles GET /employees/status/:status
-// @Summary Get employees by status
-// @Description Get a list of employees with a specific employment status
-// @Tags Employees
-// @Produce json
-// @Param status path string true "Status (active, inactive, terminated)"
-// @Security ApiKeyAuth
-// @Success 200 {array} model.Employee
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/corehr/employees/status/{status} [get]
-func (h *EmployeeHandler) GetEmployeesByStatus(c *fiber.Ctx) error {
-	status := c.Params("status")
-	employees, err := h.service.GetEmployeesByStatus(status)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-	return c.Status(fiber.StatusOK).JSON(employees)
 }

@@ -12,8 +12,7 @@ import (
 type PositionService interface {
 	CreatePosition(position *model.Position) error
 	GetPositionByID(id uint) (*model.Position, error)
-	GetPositionByTitle(title string) (*model.Position, error)
-	GetAllPositions(limit, offset int) ([]*model.Position, error)
+	GetAllPositions(limit, offset int, filter repository.PositionFilter) ([]*model.Position, error)
 	UpdatePosition(position *model.Position) error
 	DeletePosition(id uint) error
 }
@@ -38,8 +37,9 @@ func (s *positionService) CreatePosition(position *model.Position) error {
 	}
 
 	// Check if position title already exists
-	existingPos, err := s.repo.GetByTitle(position.Title)
-	if err == nil && existingPos != nil {
+	titleFilter := repository.PositionFilter{Title: position.Title}
+	existingWithTitle, _ := s.repo.GetAll(1, 0, titleFilter)
+	if len(existingWithTitle) > 0 {
 		return fmt.Errorf("position with title %s already exists", position.Title)
 	}
 
@@ -58,14 +58,9 @@ func (s *positionService) GetPositionByID(id uint) (*model.Position, error) {
 	return s.repo.GetByID(id)
 }
 
-// GetPositionByTitle retrieves a position by title
-func (s *positionService) GetPositionByTitle(title string) (*model.Position, error) {
-	return s.repo.GetByTitle(title)
-}
-
-// GetAllPositions retrieves all positions with pagination
-func (s *positionService) GetAllPositions(limit, offset int) ([]*model.Position, error) {
-	return s.repo.GetAll(limit, offset)
+// GetAllPositions retrieves all positions with pagination and optional filtering
+func (s *positionService) GetAllPositions(limit, offset int, filter repository.PositionFilter) ([]*model.Position, error) {
+	return s.repo.GetAll(limit, offset, filter)
 }
 
 // UpdatePosition updates an existing position after validation
@@ -83,8 +78,9 @@ func (s *positionService) UpdatePosition(position *model.Position) error {
 
 	// Check if title is being changed and if it already exists for another position
 	if existingPos.Title != position.Title {
-		titleExists, _ := s.repo.GetByTitle(position.Title)
-		if titleExists != nil && titleExists.ID != position.ID {
+		titleFilter := repository.PositionFilter{Title: position.Title}
+		existingWithTitle, _ := s.repo.GetAll(1, 0, titleFilter)
+		if len(existingWithTitle) > 0 && existingWithTitle[0].ID != position.ID {
 			return fmt.Errorf("position with title %s already exists", position.Title)
 		}
 	}

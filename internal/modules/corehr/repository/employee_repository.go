@@ -5,18 +5,24 @@ import (
 	"gorm.io/gorm"
 )
 
+// EmployeeFilter defines the available filters for employee list
+type EmployeeFilter struct {
+	Email        string
+	Status       string
+	DepartmentID *uint
+	ManagerID    *uint
+	Search       string // For general name search
+}
+
 // EmployeeRepository defines the interface for employee data operations
 type EmployeeRepository interface {
 	Create(employee *model.Employee) error
 	GetByID(id uint) (*model.Employee, error)
 	GetByEmail(email string) (*model.Employee, error)
 	GetByEmployeeNumber(employeeNumber string) (*model.Employee, error)
-	GetAll(limit, offset int) ([]*model.Employee, error)
+	GetAll(limit, offset int, filter EmployeeFilter) ([]*model.Employee, error)
 	Update(employee *model.Employee) error
 	Delete(id uint) error
-	GetByManagerID(managerID uint) ([]*model.Employee, error)
-	GetByDepartmentID(departmentID uint) ([]*model.Employee, error)
-	GetByStatus(status string) ([]*model.Employee, error)
 }
 
 // employeeRepository implements the EmployeeRepository interface
@@ -66,10 +72,29 @@ func (r *employeeRepository) GetByEmployeeNumber(employeeNumber string) (*model.
 	return &employee, nil
 }
 
-// GetAll retrieves all employees with pagination
-func (r *employeeRepository) GetAll(limit, offset int) ([]*model.Employee, error) {
+// GetAll retrieves employees with pagination and optional filtering
+func (r *employeeRepository) GetAll(limit, offset int, filter EmployeeFilter) ([]*model.Employee, error) {
 	var employees []*model.Employee
-	err := r.db.Preload("Department").Preload("Position").Preload("Manager").Limit(limit).Offset(offset).Find(&employees).Error
+	query := r.db.Preload("Department").Preload("Position").Preload("Manager")
+
+	if filter.Email != "" {
+		query = query.Where("email = ?", filter.Email)
+	}
+	if filter.Status != "" {
+		query = query.Where("status = ?", filter.Status)
+	}
+	if filter.DepartmentID != nil {
+		query = query.Where("department_id = ?", *filter.DepartmentID)
+	}
+	if filter.ManagerID != nil {
+		query = query.Where("manager_id = ?", *filter.ManagerID)
+	}
+	if filter.Search != "" {
+		searchTerm := "%" + filter.Search + "%"
+		query = query.Where("first_name ILIKE ? OR last_name ILIKE ?", searchTerm, searchTerm)
+	}
+
+	err := query.Limit(limit).Offset(offset).Find(&employees).Error
 	if err != nil {
 		return nil, err
 	}
@@ -84,34 +109,4 @@ func (r *employeeRepository) Update(employee *model.Employee) error {
 // Delete removes an employee by ID
 func (r *employeeRepository) Delete(id uint) error {
 	return r.db.Delete(&model.Employee{}, id).Error
-}
-
-// GetByManagerID retrieves all employees reporting to a specific manager
-func (r *employeeRepository) GetByManagerID(managerID uint) ([]*model.Employee, error) {
-	var employees []*model.Employee
-	err := r.db.Preload("Department").Preload("Position").Preload("Manager").Where("manager_id = ?", managerID).Find(&employees).Error
-	if err != nil {
-		return nil, err
-	}
-	return employees, nil
-}
-
-// GetByDepartmentID retrieves all employees in a specific department
-func (r *employeeRepository) GetByDepartmentID(departmentID uint) ([]*model.Employee, error) {
-	var employees []*model.Employee
-	err := r.db.Preload("Department").Preload("Position").Preload("Manager").Where("department_id = ?", departmentID).Find(&employees).Error
-	if err != nil {
-		return nil, err
-	}
-	return employees, nil
-}
-
-// GetByStatus retrieves all employees with a specific status
-func (r *employeeRepository) GetByStatus(status string) ([]*model.Employee, error) {
-	var employees []*model.Employee
-	err := r.db.Preload("Department").Preload("Position").Preload("Manager").Where("status = ?", status).Find(&employees).Error
-	if err != nil {
-		return nil, err
-	}
-	return employees, nil
 }

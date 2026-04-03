@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
+	"github.com/thecemakin/hr-project/internal/modules/corehr/repository"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
 
@@ -84,33 +85,15 @@ func (h *DepartmentHandler) GetDepartmentByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(department)
 }
 
-// GetDepartmentByName handles GET /departments/name/:name
-// @Summary Get department by name
-// @Description Get detailed information about a department by its unique name
-// @Tags Departments
-// @Produce json
-// @Param name path string true "Department Name"
-// @Security ApiKeyAuth
-// @Success 200 {object} model.Department
-// @Failure 404 {object} map[string]string
-// @Router /api/v1/corehr/departments/name/{name} [get]
-func (h *DepartmentHandler) GetDepartmentByName(c *fiber.Ctx) error {
-	name := c.Params("name")
-	department, err := h.service.GetDepartmentByName(name)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Department not found"})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(department)
-}
 
 // GetAllDepartments handles GET /departments
-// @Summary Get all departments
-// @Description Get a list of all departments with pagination
+// @Summary Get departments with filtering
+// @Description Get a list of departments with pagination and optional filters (name)
 // @Tags Departments
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Param name query string false "Filter by name"
 // @Security ApiKeyAuth
 // @Success 200 {array} model.Department
 // @Failure 500 {object} map[string]string
@@ -118,18 +101,23 @@ func (h *DepartmentHandler) GetDepartmentByName(c *fiber.Ctx) error {
 func (h *DepartmentHandler) GetAllDepartments(c *fiber.Ctx) error {
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
+	name := c.Query("name")
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit < 1 || limit > 100 {
+	limit, _ := strconv.Atoi(limitStr)
+	if limit < 1 || limit > 100 {
 		limit = 10
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
+	offset, _ := strconv.Atoi(offsetStr)
+	if offset < 0 {
 		offset = 0
 	}
 
-	departments, err := h.service.GetAllDepartments(limit, offset)
+	filter := repository.DepartmentFilter{
+		Name: name,
+	}
+
+	departments, err := h.service.GetAllDepartments(limit, offset, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

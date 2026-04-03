@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
+	"github.com/thecemakin/hr-project/internal/modules/corehr/repository"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/service"
 )
 
@@ -84,117 +85,55 @@ func (h *AssetAssignmentHandler) GetAssetAssignmentByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(assignment)
 }
 
-// GetAssetAssignmentsByAssetID handles GET /asset-assignments/asset/:assetId
-// @Summary Get asset assignments by asset ID
-// @Description Get all assignment history for a specific asset
-// @Tags Asset Assignments
-// @Produce json
-// @Param assetId path int true "Asset ID"
-// @Security ApiKeyAuth
-// @Success 200 {array} model.AssetAssignment
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/corehr/asset-assignments/asset/{assetId} [get]
 func (h *AssetAssignmentHandler) GetAssetAssignmentsByAssetID(c *fiber.Ctx) error {
-	assetIDParam := c.Params("assetId")
-	assetID, err := strconv.ParseUint(assetIDParam, 10, 32)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid asset ID"})
-	}
-
-	assignments, err := h.service.GetAssetAssignmentsByAssetID(uint(assetID))
+	assetID, _ := strconv.ParseUint(c.Params("assetId"), 10, 32)
+	filter := repository.AssetAssignmentFilter{AssetID: uint(assetID)}
+	assignments, err := h.service.GetAllAssetAssignments(100, 0, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	return c.Status(fiber.StatusOK).JSON(assignments)
 }
 
-// GetAssetAssignmentsByEmployeeID handles GET /asset-assignments/employee/:employeeId
-// @Summary Get asset assignments by employee ID
-// @Description Get all assignment history for a specific employee
-// @Tags Asset Assignments
-// @Produce json
-// @Param employeeId path int true "Employee ID"
-// @Security ApiKeyAuth
-// @Success 200 {array} model.AssetAssignment
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/corehr/asset-assignments/employee/{employeeId} [get]
 func (h *AssetAssignmentHandler) GetAssetAssignmentsByEmployeeID(c *fiber.Ctx) error {
-	employeeIDParam := c.Params("employeeId")
-	employeeID, err := strconv.ParseUint(employeeIDParam, 10, 32)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid employee ID"})
-	}
-
-	assignments, err := h.service.GetAssetAssignmentsByEmployeeID(uint(employeeID))
+	employeeID, _ := strconv.ParseUint(c.Params("employeeId"), 10, 32)
+	filter := repository.AssetAssignmentFilter{EmployeeID: uint(employeeID)}
+	assignments, err := h.service.GetAllAssetAssignments(100, 0, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	return c.Status(fiber.StatusOK).JSON(assignments)
 }
 
-// GetCurrentAssignmentsByEmployeeID handles GET /asset-assignments/current/employee/:employeeId
-// @Summary Get current active assignments by employee ID
-// @Description Get only the currently active asset assignments for a specific employee
-// @Tags Asset Assignments
-// @Produce json
-// @Param employeeId path int true "Employee ID"
-// @Security ApiKeyAuth
-// @Success 200 {array} model.AssetAssignment
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/corehr/asset-assignments/current/employee/{employeeId} [get]
 func (h *AssetAssignmentHandler) GetCurrentAssignmentsByEmployeeID(c *fiber.Ctx) error {
-	employeeIDParam := c.Params("employeeId")
-	employeeID, err := strconv.ParseUint(employeeIDParam, 10, 32)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid employee ID"})
-	}
-
-	assignments, err := h.service.GetCurrentAssignmentsByEmployeeID(uint(employeeID))
+	employeeID, _ := strconv.ParseUint(c.Params("employeeId"), 10, 32)
+	filter := repository.AssetAssignmentFilter{EmployeeID: uint(employeeID), Status: "assigned"}
+	assignments, err := h.service.GetAllAssetAssignments(100, 0, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	return c.Status(fiber.StatusOK).JSON(assignments)
 }
 
-// GetActiveAssignmentByAssetID handles GET /asset-assignments/active/asset/:assetId
-// @Summary Get active assignment by asset ID
-// @Description Get the current active assignment for a specific asset
-// @Tags Asset Assignments
-// @Produce json
-// @Param assetId path int true "Asset ID"
-// @Security ApiKeyAuth
-// @Success 200 {object} model.AssetAssignment
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Router /api/v1/corehr/asset-assignments/active/asset/{assetId} [get]
 func (h *AssetAssignmentHandler) GetActiveAssignmentByAssetID(c *fiber.Ctx) error {
-	assetIDParam := c.Params("assetId")
-	assetID, err := strconv.ParseUint(assetIDParam, 10, 32)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid asset ID"})
-	}
-
+	assetID, _ := strconv.ParseUint(c.Params("assetId"), 10, 32)
 	assignment, err := h.service.GetActiveAssignmentByAssetID(uint(assetID))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "No active assignment found for this asset"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	return c.Status(fiber.StatusOK).JSON(assignment)
 }
 
 // GetAllAssetAssignments handles GET /asset-assignments
-// @Summary Get all asset assignments
-// @Description Get a list of all asset assignments with pagination
+// @Summary Get asset assignments with filtering
+// @Description Get a list of all asset assignments with pagination and optional filters (asset_id, employee_id, status)
 // @Tags Asset Assignments
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Param asset_id query int false "Filter by asset ID"
+// @Param employee_id query int false "Filter by employee ID"
+// @Param status query string false "Filter by status"
 // @Security ApiKeyAuth
 // @Success 200 {array} model.AssetAssignment
 // @Failure 500 {object} map[string]string
@@ -202,18 +141,30 @@ func (h *AssetAssignmentHandler) GetActiveAssignmentByAssetID(c *fiber.Ctx) erro
 func (h *AssetAssignmentHandler) GetAllAssetAssignments(c *fiber.Ctx) error {
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
+	assetIDStr := c.Query("asset_id")
+	employeeIDStr := c.Query("employee_id")
+	status := c.Query("status")
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit < 1 || limit > 100 {
+	limit, _ := strconv.Atoi(limitStr)
+	if limit < 1 || limit > 100 {
 		limit = 10
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
+	offset, _ := strconv.Atoi(offsetStr)
+	if offset < 0 {
 		offset = 0
 	}
 
-	assignments, err := h.service.GetAllAssetAssignments(limit, offset)
+	assetID, _ := strconv.ParseUint(assetIDStr, 10, 32)
+	employeeID, _ := strconv.ParseUint(employeeIDStr, 10, 32)
+
+	filter := repository.AssetAssignmentFilter{
+		AssetID:    uint(assetID),
+		EmployeeID: uint(employeeID),
+		Status:     status,
+	}
+
+	assignments, err := h.service.GetAllAssetAssignments(limit, offset, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
