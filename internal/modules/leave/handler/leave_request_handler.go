@@ -23,6 +23,7 @@ func NewLeaveRequestHandler(service service.LeaveService) *LeaveRequestHandler {
 // @Accept json
 // @Produce json
 // @Param request body model.LeaveRequest true "Leave Request object"
+// @Security ApiKeyAuth
 // @Success 201 {object} model.LeaveRequest
 // @Failure 400 {object} map[string]string
 // @Router /api/v1/leave/leave-requests [post]
@@ -45,6 +46,7 @@ func (h *LeaveRequestHandler) SubmitRequest(c *fiber.Ctx) error {
 // @Tags Leave Requests
 // @Produce json
 // @Param employeeId query int true "Employee ID (simulation of auth context)"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.LeaveRequest
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -72,6 +74,7 @@ func (h *LeaveRequestHandler) ListOwnRequests(c *fiber.Ctx) error {
 // @Tags Leave Requests
 // @Produce json
 // @Param managerId query int true "Manager ID (simulation of auth context)"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.LeaveRequest
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -101,6 +104,7 @@ func (h *LeaveRequestHandler) ListPendingApprovals(c *fiber.Ctx) error {
 // @Param id path int true "Leave Request ID"
 // @Param managerId query int true "Manager ID (simulation of auth context)"
 // @Param body body object false "Approval note"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -141,6 +145,7 @@ func (h *LeaveRequestHandler) ApproveRequest(c *fiber.Ctx) error {
 // @Param id path int true "Leave Request ID"
 // @Param managerId query int true "Manager ID (simulation of auth context)"
 // @Param body body object false "Rejection note"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string

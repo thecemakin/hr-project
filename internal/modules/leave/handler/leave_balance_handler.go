@@ -25,6 +25,7 @@ func NewLeaveBalanceHandler(service service.LeaveService) *LeaveBalanceHandler {
 // @Tags Leave Balances
 // @Produce json
 // @Param employeeId path int true "Employee ID"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.LeaveBalance
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -51,6 +52,7 @@ func (h *LeaveBalanceHandler) ListLeaveBalancesByEmployee(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param request body object true "Initialization request"
+// @Security ApiKeyAuth
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

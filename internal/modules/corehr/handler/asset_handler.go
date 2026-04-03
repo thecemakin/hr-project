@@ -27,6 +27,7 @@ func NewAssetHandler(service service.AssetService) *AssetHandler {
 // @Accept json
 // @Produce json
 // @Param asset body model.Asset true "Asset object"
+// @Security ApiKeyAuth
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -77,6 +78,7 @@ func (h *AssetHandler) CreateAsset(c *fiber.Ctx) error {
 // @Tags Assets
 // @Produce json
 // @Param id path int true "Asset ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Asset
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -102,6 +104,7 @@ func (h *AssetHandler) GetAssetByID(c *fiber.Ctx) error {
 // @Tags Assets
 // @Produce json
 // @Param serialNumber path string true "Serial Number"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Asset
 // @Failure 404 {object} map[string]string
 // @Router /api/v1/corehr/assets/serial/{serialNumber} [get]
@@ -121,6 +124,7 @@ func (h *AssetHandler) GetAssetBySerialNumber(c *fiber.Ctx) error {
 // @Tags Assets
 // @Produce json
 // @Param assetTag path string true "Asset Tag"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Asset
 // @Failure 404 {object} map[string]string
 // @Router /api/v1/corehr/assets/tag/{assetTag} [get]
@@ -141,6 +145,7 @@ func (h *AssetHandler) GetAssetByAssetTag(c *fiber.Ctx) error {
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Asset
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/corehr/assets [get]
@@ -174,6 +179,7 @@ func (h *AssetHandler) GetAllAssets(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "Asset ID"
 // @Param asset body model.Asset true "Asset update object"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -204,6 +210,7 @@ func (h *AssetHandler) UpdateAsset(c *fiber.Ctx) error {
 // @Tags Assets
 // @Produce json
 // @Param id path int true "Asset ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -228,6 +235,7 @@ func (h *AssetHandler) DeleteAsset(c *fiber.Ctx) error {
 // @Tags Assets
 // @Produce json
 // @Param status path string true "Status (available, assigned, maintenance, retired)"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Asset
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/corehr/assets/status/{status} [get]
@@ -247,6 +255,7 @@ func (h *AssetHandler) GetAssetsByStatus(c *fiber.Ctx) error {
 // @Tags Assets
 // @Produce json
 // @Param type path string true "Asset Type (laptop, phone, tablet, etc.)"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Asset
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/corehr/assets/type/{type} [get]

@@ -316,7 +316,25 @@ definitions:
         description: Valid is true if Time is not NULL
         type: boolean
     type: object
-host: localhost:3000
+  internal_modules_auth_handler.loginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  internal_modules_auth_handler.registerRequest:
+    properties:
+      email:
+        type: string
+      employee_id:
+        type: integer
+      password:
+        type: string
+      role:
+        type: string
+    type: object
+host: localhost:8080
 info:
   contact:
     email: support@swagger.io
@@ -330,6 +348,66 @@ info:
   title: HR Backend API
   version: "1.0"
 paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT
+      parameters:
+      - description: Login credentials
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/internal_modules_auth_handler.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token and user data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - Auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new login account (Admin only)
+      parameters:
+      - description: User data
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/internal_modules_auth_handler.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created user
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create user
+      tags:
+      - Auth
   /api/v1/corehr/asset-assignments:
     get:
       description: Get a list of all asset assignments with pagination
@@ -359,6 +437,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all asset assignments
       tags:
       - Asset Assignments
@@ -394,6 +474,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create a new asset assignment
       tags:
       - Asset Assignments
@@ -427,6 +509,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete an asset assignment
       tags:
       - Asset Assignments
@@ -457,6 +541,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get asset assignment by ID
       tags:
       - Asset Assignments
@@ -497,6 +583,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update an asset assignment
       tags:
       - Asset Assignments
@@ -528,6 +616,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get active assignment by asset ID
       tags:
       - Asset Assignments
@@ -561,6 +651,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get asset assignments by asset ID
       tags:
       - Asset Assignments
@@ -595,6 +687,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get current active assignments by employee ID
       tags:
       - Asset Assignments
@@ -628,6 +722,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get asset assignments by employee ID
       tags:
       - Asset Assignments
@@ -660,6 +756,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all assets
       tags:
       - Assets
@@ -695,6 +793,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create a new asset
       tags:
       - Assets
@@ -736,6 +836,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Return an assigned asset
       tags:
       - Assets
@@ -769,6 +871,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete an asset
       tags:
       - Assets
@@ -799,6 +903,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get asset by ID
       tags:
       - Assets
@@ -839,6 +945,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update an asset
       tags:
       - Assets
@@ -875,6 +983,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Assign an asset to an employee (convenience)
       tags:
       - Assets
@@ -900,6 +1010,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get asset by serial number
       tags:
       - Assets
@@ -927,6 +1039,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get assets by status
       tags:
       - Assets
@@ -952,6 +1066,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get asset by asset tag
       tags:
       - Assets
@@ -979,6 +1095,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get assets by type
       tags:
       - Assets
@@ -1011,6 +1129,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all departments
       tags:
       - Departments
@@ -1046,6 +1166,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create a new department
       tags:
       - Departments
@@ -1079,6 +1201,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete a department
       tags:
       - Departments
@@ -1109,6 +1233,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get department by ID
       tags:
       - Departments
@@ -1149,6 +1275,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update a department
       tags:
       - Departments
@@ -1174,6 +1302,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get department by name
       tags:
       - Departments
@@ -1206,6 +1336,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all employees
       tags:
       - Employees
@@ -1241,6 +1373,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create a new employee
       tags:
       - Employees
@@ -1274,6 +1408,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete an employee
       tags:
       - Employees
@@ -1304,6 +1440,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get employee by ID
       tags:
       - Employees
@@ -1344,6 +1482,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update an employee
       tags:
       - Employees
@@ -1377,6 +1517,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get employees by department ID
       tags:
       - Employees
@@ -1402,6 +1544,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get employee by email
       tags:
       - Employees
@@ -1435,6 +1579,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get employees by manager ID
       tags:
       - Employees
@@ -1462,6 +1608,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get employees by status
       tags:
       - Employees
@@ -1494,6 +1642,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all positions
       tags:
       - Positions
@@ -1529,6 +1679,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create a new position
       tags:
       - Positions
@@ -1562,6 +1714,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete a position
       tags:
       - Positions
@@ -1592,6 +1746,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get position by ID
       tags:
       - Positions
@@ -1632,6 +1788,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update a position
       tags:
       - Positions
@@ -1657,6 +1815,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get position by title
       tags:
       - Positions
@@ -1691,6 +1851,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: List leave balances for an employee
       tags:
       - Leave Balances
@@ -1727,6 +1889,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Initialize leave balance for an employee
       tags:
       - Leave Balances
@@ -1755,6 +1919,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Submit a new leave request
       tags:
       - Leave Requests
@@ -1800,6 +1966,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Approve a leave request
       tags:
       - Leave Requests
@@ -1845,6 +2013,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Reject a leave request
       tags:
       - Leave Requests
@@ -1878,6 +2048,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: List own leave requests
       tags:
       - Leave Requests
@@ -1911,6 +2083,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: List pending leave requests for approval
       tags:
       - Leave Requests
@@ -1932,6 +2106,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: List all leave types
       tags:
       - Leave Types
@@ -1965,6 +2141,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create a new leave type
       tags:
       - Leave Types
@@ -1996,7 +2174,15 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get leave type by ID
       tags:
       - Leave Types
+securityDefinitions:
+  ApiKeyAuth:
+    description: Type "Bearer <your-jwt-token>" to authenticate.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -27,6 +27,7 @@ func NewAssetAssignmentHandler(service service.AssetAssignmentService) *AssetAss
 // @Accept json
 // @Produce json
 // @Param assignment body model.AssetAssignment true "Asset Assignment object"
+// @Security ApiKeyAuth
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -63,6 +64,7 @@ func (h *AssetAssignmentHandler) CreateAssetAssignment(c *fiber.Ctx) error {
 // @Tags Asset Assignments
 // @Produce json
 // @Param id path int true "Assignment ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.AssetAssignment
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -88,6 +90,7 @@ func (h *AssetAssignmentHandler) GetAssetAssignmentByID(c *fiber.Ctx) error {
 // @Tags Asset Assignments
 // @Produce json
 // @Param assetId path int true "Asset ID"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.AssetAssignment
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -113,6 +116,7 @@ func (h *AssetAssignmentHandler) GetAssetAssignmentsByAssetID(c *fiber.Ctx) erro
 // @Tags Asset Assignments
 // @Produce json
 // @Param employeeId path int true "Employee ID"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.AssetAssignment
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -138,6 +142,7 @@ func (h *AssetAssignmentHandler) GetAssetAssignmentsByEmployeeID(c *fiber.Ctx) e
 // @Tags Asset Assignments
 // @Produce json
 // @Param employeeId path int true "Employee ID"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.AssetAssignment
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -163,6 +168,7 @@ func (h *AssetAssignmentHandler) GetCurrentAssignmentsByEmployeeID(c *fiber.Ctx)
 // @Tags Asset Assignments
 // @Produce json
 // @Param assetId path int true "Asset ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.AssetAssignment
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -189,6 +195,7 @@ func (h *AssetAssignmentHandler) GetActiveAssignmentByAssetID(c *fiber.Ctx) erro
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Security ApiKeyAuth
 // @Success 200 {array} model.AssetAssignment
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/corehr/asset-assignments [get]
@@ -222,6 +229,7 @@ func (h *AssetAssignmentHandler) GetAllAssetAssignments(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "Assignment ID"
 // @Param assignment body model.AssetAssignment true "Asset Assignment update object"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -252,6 +260,7 @@ func (h *AssetAssignmentHandler) UpdateAssetAssignment(c *fiber.Ctx) error {
 // @Tags Asset Assignments
 // @Produce json
 // @Param id path int true "Assignment ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -277,6 +286,7 @@ func (h *AssetAssignmentHandler) DeleteAssetAssignment(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param assignment body object true "Assignment request"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -308,6 +318,7 @@ func (h *AssetAssignmentHandler) AssignAsset(c *fiber.Ctx) error {
 // @Produce json
 // @Param assignmentId path int true "Assignment ID"
 // @Param return body object true "Return request"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

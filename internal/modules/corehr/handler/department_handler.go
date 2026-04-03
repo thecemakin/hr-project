@@ -27,6 +27,7 @@ func NewDepartmentHandler(service service.DepartmentService) *DepartmentHandler 
 // @Accept json
 // @Produce json
 // @Param department body model.Department true "Department object"
+// @Security ApiKeyAuth
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -63,6 +64,7 @@ func (h *DepartmentHandler) CreateDepartment(c *fiber.Ctx) error {
 // @Tags Departments
 // @Produce json
 // @Param id path int true "Department ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Department
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -88,6 +90,7 @@ func (h *DepartmentHandler) GetDepartmentByID(c *fiber.Ctx) error {
 // @Tags Departments
 // @Produce json
 // @Param name path string true "Department Name"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Department
 // @Failure 404 {object} map[string]string
 // @Router /api/v1/corehr/departments/name/{name} [get]
@@ -108,6 +111,7 @@ func (h *DepartmentHandler) GetDepartmentByName(c *fiber.Ctx) error {
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Department
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/corehr/departments [get]
@@ -141,6 +145,7 @@ func (h *DepartmentHandler) GetAllDepartments(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "Department ID"
 // @Param department body model.Department true "Department update object"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -171,6 +176,7 @@ func (h *DepartmentHandler) UpdateDepartment(c *fiber.Ctx) error {
 // @Tags Departments
 // @Produce json
 // @Param id path int true "Department ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

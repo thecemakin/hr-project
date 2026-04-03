@@ -27,6 +27,7 @@ func NewEmployeeHandler(service service.EmployeeService) *EmployeeHandler {
 // @Accept json
 // @Produce json
 // @Param employee body model.Employee true "Employee object"
+// @Security ApiKeyAuth
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -101,6 +102,7 @@ func (h *EmployeeHandler) CreateEmployee(c *fiber.Ctx) error {
 // @Tags Employees
 // @Produce json
 // @Param id path int true "Employee ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Employee
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -125,6 +127,7 @@ func (h *EmployeeHandler) GetEmployeeByID(c *fiber.Ctx) error {
 // @Tags Employees
 // @Produce json
 // @Param email path string true "Employee Email"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Employee
 // @Failure 404 {object} map[string]string
 // @Router /api/v1/corehr/employees/email/{email} [get]
@@ -144,6 +147,7 @@ func (h *EmployeeHandler) GetEmployeeByEmail(c *fiber.Ctx) error {
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Employee
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/corehr/employees [get]
@@ -175,6 +179,7 @@ func (h *EmployeeHandler) GetAllEmployees(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "Employee ID"
 // @Param employee body model.Employee true "Employee update object"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -205,6 +210,7 @@ func (h *EmployeeHandler) UpdateEmployee(c *fiber.Ctx) error {
 // @Tags Employees
 // @Produce json
 // @Param id path int true "Employee ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -227,6 +233,7 @@ func (h *EmployeeHandler) DeleteEmployee(c *fiber.Ctx) error {
 // @Tags Employees
 // @Produce json
 // @Param managerId path int true "Manager ID"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Employee
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -250,6 +257,7 @@ func (h *EmployeeHandler) GetEmployeesByManagerID(c *fiber.Ctx) error {
 // @Tags Employees
 // @Produce json
 // @Param departmentId path int true "Department ID"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Employee
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -273,6 +281,7 @@ func (h *EmployeeHandler) GetEmployeesByDepartmentID(c *fiber.Ctx) error {
 // @Tags Employees
 // @Produce json
 // @Param status path string true "Status (active, inactive, terminated)"
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Employee
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/corehr/employees/status/{status} [get]

@@ -25,8 +25,106 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/auth/login": {
+            "post": {
+                "description": "Authenticate user and return JWT",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_auth_handler.loginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token and user data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Error message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new login account (Admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "register",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_auth_handler.registerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created user",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/corehr/asset-assignments": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all asset assignments with pagination",
                 "produces": [
                     "application/json"
@@ -73,6 +171,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new record for an asset assigned to an employee",
                 "consumes": [
                     "application/json"
@@ -128,6 +231,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/asset-assignments/active/asset/{assetId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get the current active assignment for a specific asset",
                 "produces": [
                     "application/json"
@@ -175,6 +283,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/asset-assignments/asset/{assetId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all assignment history for a specific asset",
                 "produces": [
                     "application/json"
@@ -225,6 +338,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/asset-assignments/current/employee/{employeeId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get only the currently active asset assignments for a specific employee",
                 "produces": [
                     "application/json"
@@ -275,6 +393,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/asset-assignments/employee/{employeeId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all assignment history for a specific employee",
                 "produces": [
                     "application/json"
@@ -325,6 +448,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/asset-assignments/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about an asset assignment",
                 "produces": [
                     "application/json"
@@ -370,6 +498,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing asset assignment's details",
                 "consumes": [
                     "application/json"
@@ -430,6 +563,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete an asset assignment by its ID",
                 "produces": [
                     "application/json"
@@ -480,6 +618,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/assets": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all assets with pagination",
                 "produces": [
                     "application/json"
@@ -526,6 +669,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new asset with the provided details",
                 "consumes": [
                     "application/json"
@@ -581,6 +729,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/assets/assign": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Directly assign an asset to an employee",
                 "consumes": [
                     "application/json"
@@ -636,6 +789,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/assets/serial/{serialNumber}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about an asset by its serial number",
                 "produces": [
                     "application/json"
@@ -674,6 +832,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/assets/status/{status}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of assets with a specific status",
                 "produces": [
                     "application/json"
@@ -715,6 +878,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/assets/tag/{assetTag}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about an asset by its asset tag",
                 "produces": [
                     "application/json"
@@ -753,6 +921,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/assets/type/{type}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of assets of a specific type",
                 "produces": [
                     "application/json"
@@ -794,6 +967,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/assets/{assignmentId}/return": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Mark an assigned asset as returned",
                 "consumes": [
                     "application/json"
@@ -856,6 +1034,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/assets/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about an asset",
                 "produces": [
                     "application/json"
@@ -901,6 +1084,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing asset's details",
                 "consumes": [
                     "application/json"
@@ -961,6 +1149,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete an asset by its ID",
                 "produces": [
                     "application/json"
@@ -1011,6 +1204,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/departments": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all departments with pagination",
                 "produces": [
                     "application/json"
@@ -1057,6 +1255,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new department with the provided details",
                 "consumes": [
                     "application/json"
@@ -1112,6 +1315,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/departments/name/{name}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about a department by its unique name",
                 "produces": [
                     "application/json"
@@ -1150,6 +1358,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/departments/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about a department",
                 "produces": [
                     "application/json"
@@ -1195,6 +1408,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing department's details",
                 "consumes": [
                     "application/json"
@@ -1255,6 +1473,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete a department by its ID",
                 "produces": [
                     "application/json"
@@ -1305,6 +1528,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/employees": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all employees with pagination",
                 "produces": [
                     "application/json"
@@ -1351,6 +1579,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new employee with the provided details",
                 "consumes": [
                     "application/json"
@@ -1406,6 +1639,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/employees/department/{departmentId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of employees in a specific department",
                 "produces": [
                     "application/json"
@@ -1456,6 +1694,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/employees/email/{email}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about an employee by their email address",
                 "produces": [
                     "application/json"
@@ -1494,6 +1737,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/employees/manager/{managerId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of employees reporting to a specific manager",
                 "produces": [
                     "application/json"
@@ -1544,6 +1792,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/employees/status/{status}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of employees with a specific employment status",
                 "produces": [
                     "application/json"
@@ -1585,6 +1838,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/employees/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about an employee",
                 "produces": [
                     "application/json"
@@ -1630,6 +1888,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing employee's details",
                 "consumes": [
                     "application/json"
@@ -1690,6 +1953,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete an employee by their ID",
                 "produces": [
                     "application/json"
@@ -1740,6 +2008,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/positions": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all positions with pagination",
                 "produces": [
                     "application/json"
@@ -1786,6 +2059,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new job position or role",
                 "consumes": [
                     "application/json"
@@ -1841,6 +2119,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/positions/title/{title}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about a position by its title",
                 "produces": [
                     "application/json"
@@ -1879,6 +2162,11 @@ const docTemplate = `{
         },
         "/api/v1/corehr/positions/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about a position",
                 "produces": [
                     "application/json"
@@ -1924,6 +2212,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing position's details",
                 "consumes": [
                     "application/json"
@@ -1984,6 +2277,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete a position by its ID",
                 "produces": [
                     "application/json"
@@ -2034,6 +2332,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-balances/init": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Set the starting leave balance for an employee and leave type",
                 "consumes": [
                     "application/json"
@@ -2089,6 +2392,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-balances/{employeeId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all leave balances (total and used) for a specific employee",
                 "produces": [
                     "application/json"
@@ -2139,6 +2447,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-requests": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new leave request for approval",
                 "consumes": [
                     "application/json"
@@ -2182,6 +2495,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-requests/me": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of leave requests submitted by the current employee",
                 "produces": [
                     "application/json"
@@ -2232,6 +2550,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-requests/pending-approvals": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of leave requests pending approval for a specific manager",
                 "produces": [
                     "application/json"
@@ -2282,6 +2605,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-requests/{id}/approve": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Approve a pending leave request",
                 "consumes": [
                     "application/json"
@@ -2350,6 +2678,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-requests/{id}/reject": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Reject a pending leave request",
                 "consumes": [
                     "application/json"
@@ -2418,6 +2751,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-types": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all available leave types",
                 "produces": [
                     "application/json"
@@ -2448,6 +2786,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new category for leave requests",
                 "consumes": [
                     "application/json"
@@ -2500,6 +2843,11 @@ const docTemplate = `{
         },
         "/api/v1/leave/leave-types/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get detailed information about a leave type",
                 "produces": [
                     "application/json"
@@ -3021,6 +3369,42 @@ const docTemplate = `{
                     "type": "boolean"
                 }
             }
+        },
+        "internal_modules_auth_handler.loginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_auth_handler.registerRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "employee_id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Type \"Bearer \u003cyour-jwt-token\u003e\" to authenticate.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
@@ -3028,7 +3412,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:3000",
+	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "HR Backend API",

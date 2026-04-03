@@ -12,8 +12,13 @@ package main
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:3000
+// @host localhost:8080
 // @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer <your-jwt-token>" to authenticate.
 
 import (
 	"log"

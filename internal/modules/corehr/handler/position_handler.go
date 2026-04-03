@@ -27,6 +27,7 @@ func NewPositionHandler(service service.PositionService) *PositionHandler {
 // @Accept json
 // @Produce json
 // @Param position body model.Position true "Position object"
+// @Security ApiKeyAuth
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -71,6 +72,7 @@ func (h *PositionHandler) CreatePosition(c *fiber.Ctx) error {
 // @Tags Positions
 // @Produce json
 // @Param id path int true "Position ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Position
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -96,6 +98,7 @@ func (h *PositionHandler) GetPositionByID(c *fiber.Ctx) error {
 // @Tags Positions
 // @Produce json
 // @Param title path string true "Position Title"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.Position
 // @Failure 404 {object} map[string]string
 // @Router /api/v1/corehr/positions/title/{title} [get]
@@ -116,6 +119,7 @@ func (h *PositionHandler) GetPositionByTitle(c *fiber.Ctx) error {
 // @Produce json
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
+// @Security ApiKeyAuth
 // @Success 200 {array} model.Position
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/corehr/positions [get]
@@ -149,6 +153,7 @@ func (h *PositionHandler) GetAllPositions(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "Position ID"
 // @Param position body model.Position true "Position update object"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -179,6 +184,7 @@ func (h *PositionHandler) UpdatePosition(c *fiber.Ctx) error {
 // @Tags Positions
 // @Produce json
 // @Param id path int true "Position ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

@@ -23,6 +23,7 @@ func NewLeaveTypeHandler(service service.LeaveService) *LeaveTypeHandler {
 // @Accept json
 // @Produce json
 // @Param leaveType body model.LeaveType true "Leave Type object"
+// @Security ApiKeyAuth
 // @Success 201 {object} model.LeaveType
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -46,6 +47,7 @@ func (h *LeaveTypeHandler) CreateLeaveType(c *fiber.Ctx) error {
 // @Tags Leave Types
 // @Produce json
 // @Param id path int true "Leave Type ID"
+// @Security ApiKeyAuth
 // @Success 200 {object} model.LeaveType
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -69,6 +71,7 @@ func (h *LeaveTypeHandler) GetLeaveType(c *fiber.Ctx) error {
 // @Summary List all leave types
 // @Description Get a list of all available leave types
 // @Tags Leave Types
+// @Security ApiKeyAuth
 // @Produce json
 // @Success 200 {array} model.LeaveType
 // @Failure 500 {object} map[string]string
