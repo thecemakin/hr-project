@@ -7,6 +7,8 @@ import (
 	corehrrepo "github.com/thecemakin/hr-project/internal/modules/corehr/repository"
 	"github.com/thecemakin/hr-project/internal/modules/leave/model"
 	"github.com/thecemakin/hr-project/internal/modules/leave/repository"
+	"github.com/thecemakin/hr-project/internal/platform/audit"
+	"github.com/thecemakin/hr-project/internal/platform/notification"
 )
 
 // LeaveService defines business logic for Leave module
@@ -33,13 +35,17 @@ type LeaveService interface {
 type leaveService struct {
 	repo       repository.Repository
 	corehrRepo corehrrepo.EmployeeRepository
+	audit      audit.Service
+	notifier   notification.Notifier
 }
 
 // NewLeaveService creates a new LeaveService instance
-func NewLeaveService(repo repository.Repository, corehrRepo corehrrepo.EmployeeRepository) LeaveService {
+func NewLeaveService(repo repository.Repository, corehrRepo corehrrepo.EmployeeRepository, audit audit.Service, notifier notification.Notifier) LeaveService {
 	return &leaveService{
 		repo:       repo,
 		corehrRepo: corehrRepo,
+		audit:      audit,
+		notifier:   notifier,
 	}
 }
 
@@ -104,7 +110,20 @@ func (s *leaveService) SubmitLeaveRequest(req *model.LeaveRequest) error {
 	}
 
 	req.Status = "pending"
-	return s.repo.CreateLeaveRequest(req)
+	if err := s.repo.CreateLeaveRequest(req); err != nil {
+		return err
+	}
+
+	// Notify (Simulation)
+	emp, _ := s.corehrRepo.GetByID(req.EmployeeID)
+	if emp != nil {
+		_ = s.notifier.Send(emp.Email, "Leave Request Submitted", "Your leave request has been submitted and is pending approval.")
+	}
+
+	// Audit log
+	_ = s.audit.Log(req.EmployeeID, "CREATE", "leave_requests", req.ID, nil, req, nil)
+
+	return nil
 }
 
 func (s *leaveService) GetLeaveRequestByID(id uint) (*model.LeaveRequest, error) {
@@ -161,9 +180,19 @@ func (s *leaveService) ApproveLeaveRequest(requestID, managerID uint, note strin
 	req.Status = "approved"
 	req.ReviewerID = &managerID
 	req.ReviewerNote = note
-	req.UpdatedAt = time.Now() // Though GORM handles this usually
+	req.UpdatedAt = time.Now()
 
-	return s.repo.UpdateLeaveRequest(req)
+	if err := s.repo.UpdateLeaveRequest(req); err != nil {
+		return err
+	}
+
+	// Notify
+	_ = s.notifier.Send(emp.Email, "Leave Request Approved", "Your leave request has been approved.")
+
+	// Audit log
+	_ = s.audit.Log(managerID, "APPROVE", "leave_requests", req.ID, "pending", "approved", map[string]string{"note": note})
+
+	return nil
 }
 
 func (s *leaveService) RejectLeaveRequest(requestID, managerID uint, note string) error {
@@ -192,5 +221,15 @@ func (s *leaveService) RejectLeaveRequest(requestID, managerID uint, note string
 	req.ReviewerNote = note
 	req.UpdatedAt = time.Now()
 
-	return s.repo.UpdateLeaveRequest(req)
+	if err := s.repo.UpdateLeaveRequest(req); err != nil {
+		return err
+	}
+
+	// Notify
+	_ = s.notifier.Send(emp.Email, "Leave Request Approved", "Your leave request has been approved.")
+
+	// Audit log
+	_ = s.audit.Log(managerID, "REJECT", "leave_requests", req.ID, "pending", "rejected", map[string]string{"note": note})
+
+	return nil
 }

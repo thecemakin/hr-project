@@ -66,7 +66,7 @@ func (h *AssetHandler) CreateAsset(c *fiber.Ctx) error {
 		Condition:       body.Condition,
 	}
 
-	if err := h.service.CreateAsset(asset); err != nil {
+	if err := h.service.CreateAsset(1, asset); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -196,7 +196,7 @@ func (h *AssetHandler) UpdateAsset(c *fiber.Ctx) error {
 	}
 	body.ID = uint(id)
 
-	if err := h.service.UpdateAsset(&body); err != nil {
+	if err := h.service.UpdateAsset(1, &body); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -221,7 +221,7 @@ func (h *AssetHandler) DeleteAsset(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid asset ID"})
 	}
 
-	if err := h.service.DeleteAsset(uint(id)); err != nil {
+	if err := h.service.DeleteAsset(1, uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 

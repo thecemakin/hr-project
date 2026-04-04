@@ -26,6 +26,8 @@ import (
 
 	"github.com/thecemakin/hr-project/internal/platform/config"
 	"github.com/thecemakin/hr-project/internal/platform/db"
+	"github.com/thecemakin/hr-project/internal/platform/audit"
+	"github.com/thecemakin/hr-project/internal/platform/notification"
 	server "github.com/thecemakin/hr-project/internal/platform/http"
 	"github.com/thecemakin/hr-project/internal/platform/auth"
 
@@ -58,6 +60,9 @@ func main() {
 	}
 	log.Println("Database connection established:", database.Name())
 
+	// 2.1 Setup Audit Service
+	auditService := audit.NewAuditService(database)
+
 	// 3. Setup Auth Platform
 	ttl, err := time.ParseDuration(cfg.JWTAccessTokenTTL)
 	if err != nil {
@@ -84,10 +89,10 @@ func main() {
 	assetRepo := corehrRepo.NewAssetRepository(database)
 	assetAssignmentRepo := corehrRepo.NewAssetAssignmentRepository(database)
 
-	employeeSvc := corehrSvc.NewEmployeeService(employeeRepo)
+	employeeSvc := corehrSvc.NewEmployeeService(employeeRepo, auditService)
 	departmentSvc := corehrSvc.NewDepartmentService(departmentRepo)
 	positionSvc := corehrSvc.NewPositionService(positionRepo)
-	assetSvc := corehrSvc.NewAssetService(assetRepo)
+	assetSvc := corehrSvc.NewAssetService(assetRepo, auditService)
 	assetAssignmentSvc := corehrSvc.NewAssetAssignmentService(assetAssignmentRepo, assetRepo, employeeRepo)
 
 	employeeHdl := corehrHandler.NewEmployeeHandler(employeeSvc)
@@ -102,7 +107,8 @@ func main() {
 
 	// 5. Initialize Leave Module
 	leaveRepository := leaveRepo.NewSQLRepository(database)
-	leaveService := leaveSvc.NewLeaveService(leaveRepository, employeeRepo)
+	notificationService := notification.NewLogNotifier()
+	leaveService := leaveSvc.NewLeaveService(leaveRepository, employeeRepo, auditService, notificationService)
 	
 	leaveHandler.SetupRoutesFiber(srv.App, leaveService, tp)
 

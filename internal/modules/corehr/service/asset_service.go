@@ -6,31 +6,34 @@ import (
 
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/repository"
+	"github.com/thecemakin/hr-project/internal/platform/audit"
 )
 
 // AssetService defines the interface for asset business operations
 type AssetService interface {
-	CreateAsset(asset *model.Asset) error
+	CreateAsset(actorID uint, asset *model.Asset) error
 	GetAssetByID(id uint) (*model.Asset, error)
 	GetAllAssets(limit, offset int, filter repository.AssetFilter) ([]*model.Asset, error)
-	UpdateAsset(asset *model.Asset) error
-	DeleteAsset(id uint) error
+	UpdateAsset(actorID uint, asset *model.Asset) error
+	DeleteAsset(actorID uint, id uint) error
 }
 
 // assetService implements the AssetService interface
 type assetService struct {
-	repo repository.AssetRepository
+	repo  repository.AssetRepository
+	audit audit.Service
 }
 
 // NewAssetService creates a new instance of assetService
-func NewAssetService(repo repository.AssetRepository) AssetService {
+func NewAssetService(repo repository.AssetRepository, audit audit.Service) AssetService {
 	return &assetService{
-		repo: repo,
+		repo:  repo,
+		audit: audit,
 	}
 }
 
 // CreateAsset creates a new asset after validation
-func (s *assetService) CreateAsset(asset *model.Asset) error {
+func (s *assetService) CreateAsset(actorID uint, asset *model.Asset) error {
 	// Validate required fields
 	if asset.SerialNumber == "" || asset.Name == "" || asset.Type == "" {
 		return errors.New("serial number, name, and type are required")
@@ -53,7 +56,14 @@ func (s *assetService) CreateAsset(asset *model.Asset) error {
 	}
 
 	// Create the asset
-	return s.repo.Create(asset)
+	if err := s.repo.Create(asset); err != nil {
+		return err
+	}
+
+	// Audit log
+	_ = s.audit.Log(actorID, "CREATE", "assets", asset.ID, nil, asset, nil)
+
+	return nil
 }
 
 // GetAssetByID retrieves an asset by ID
@@ -68,7 +78,7 @@ func (s *assetService) GetAllAssets(limit, offset int, filter repository.AssetFi
 }
 
 // UpdateAsset updates an existing asset after validation
-func (s *assetService) UpdateAsset(asset *model.Asset) error {
+func (s *assetService) UpdateAsset(actorID uint, asset *model.Asset) error {
 	// Validate required fields
 	if asset.SerialNumber == "" || asset.Name == "" || asset.Type == "" {
 		return errors.New("serial number, name, and type are required")
@@ -99,18 +109,32 @@ func (s *assetService) UpdateAsset(asset *model.Asset) error {
 	}
 
 	// Update the asset
-	return s.repo.Update(asset)
+	if err := s.repo.Update(asset); err != nil {
+		return err
+	}
+
+	// Audit log
+	_ = s.audit.Log(actorID, "UPDATE", "assets", asset.ID, existingAsset, asset, nil)
+
+	return nil
 }
 
 // DeleteAsset removes an asset by ID
-func (s *assetService) DeleteAsset(id uint) error {
+func (s *assetService) DeleteAsset(actorID uint, id uint) error {
 	// Check if asset exists
-	_, err := s.repo.GetByID(id)
+	existing, err := s.repo.GetByID(id)
 	if err != nil {
 		return fmt.Errorf("asset with ID %d does not exist", id)
 	}
 
 	// TODO: Check if asset has any active assignments before deletion
 	// For now, just delete the asset
-	return s.repo.Delete(id)
+	if err := s.repo.Delete(id); err != nil {
+		return err
+	}
+
+	// Audit log
+	_ = s.audit.Log(actorID, "DELETE", "assets", id, existing, nil, nil)
+
+	return nil
 }

@@ -91,7 +91,7 @@ func (h *EmployeeHandler) CreateEmployee(c *fiber.Ctx) error {
 		BankRoutingNumber:     body.BankRoutingNumber,
 	}
 
-	if err := h.service.CreateEmployee(employee); err != nil {
+	if err := h.service.CreateEmployee(1, employee); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Employee created successfully"})
@@ -220,7 +220,7 @@ func (h *EmployeeHandler) UpdateEmployee(c *fiber.Ctx) error {
 
 	employee.ID = uint(id)
 
-	if err := h.service.UpdateEmployee(&employee); err != nil {
+	if err := h.service.UpdateEmployee(1, &employee); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Employee updated successfully"})
@@ -243,7 +243,7 @@ func (h *EmployeeHandler) DeleteEmployee(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid employee ID"})
 	}
-	if err := h.service.DeleteEmployee(uint(id)); err != nil {
+	if err := h.service.DeleteEmployee(1, uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Employee deleted successfully"})

@@ -6,34 +6,37 @@ import (
 
 	"github.com/thecemakin/hr-project/internal/modules/corehr/model"
 	"github.com/thecemakin/hr-project/internal/modules/corehr/repository"
+	"github.com/thecemakin/hr-project/internal/platform/audit"
 )
 
 // EmployeeService defines the interface for employee business operations
 type EmployeeService interface {
-	CreateEmployee(employee *model.Employee) error
+	CreateEmployee(actorID uint, employee *model.Employee) error
 	GetEmployeeByID(id uint) (*model.Employee, error)
 	GetEmployeeByEmail(email string) (*model.Employee, error)
 	GetAllEmployees(limit, offset int, filter repository.EmployeeFilter) ([]*model.Employee, error)
-	UpdateEmployee(employee *model.Employee) error
-	DeleteEmployee(id uint) error
+	UpdateEmployee(actorID uint, employee *model.Employee) error
+	DeleteEmployee(actorID uint, id uint) error
 	ValidateManagerRelationship(employeeID, managerID uint) (bool, error)
 	GetOrganizationTree() ([]*model.OrganizationNode, error)
 }
 
 // employeeService implements the EmployeeService interface
 type employeeService struct {
-	repo repository.EmployeeRepository
+	repo  repository.EmployeeRepository
+	audit audit.Service
 }
 
 // NewEmployeeService creates a new instance of employeeService
-func NewEmployeeService(repo repository.EmployeeRepository) EmployeeService {
+func NewEmployeeService(repo repository.EmployeeRepository, audit audit.Service) EmployeeService {
 	return &employeeService{
-		repo: repo,
+		repo:  repo,
+		audit: audit,
 	}
 }
 
 // CreateEmployee creates a new employee after validation
-func (s *employeeService) CreateEmployee(employee *model.Employee) error {
+func (s *employeeService) CreateEmployee(actorID uint, employee *model.Employee) error {
 	// Validate required fields
 	if employee.FirstName == "" || employee.LastName == "" || employee.Email == "" || employee.EmployeeNumber == "" {
 		return errors.New("first name, last name, email, and employee number are required")
@@ -63,7 +66,14 @@ func (s *employeeService) CreateEmployee(employee *model.Employee) error {
 	}
 
 	// Create the employee
-	return s.repo.Create(employee)
+	if err := s.repo.Create(employee); err != nil {
+		return err
+	}
+
+	// Audit log
+	_ = s.audit.Log(actorID, "CREATE", "employees", employee.ID, nil, employee, nil)
+
+	return nil
 }
 
 // GetEmployeeByID retrieves an employee by ID
@@ -82,7 +92,7 @@ func (s *employeeService) GetAllEmployees(limit, offset int, filter repository.E
 }
 
 // UpdateEmployee updates an existing employee after validation
-func (s *employeeService) UpdateEmployee(employee *model.Employee) error {
+func (s *employeeService) UpdateEmployee(actorID uint, employee *model.Employee) error {
 	// Validate required fields
 	if employee.FirstName == "" || employee.LastName == "" || employee.Email == "" || employee.EmployeeNumber == "" {
 		return errors.New("first name, last name, email, and employee number are required")
@@ -122,20 +132,34 @@ func (s *employeeService) UpdateEmployee(employee *model.Employee) error {
 	}
 
 	// Update the employee
-	return s.repo.Update(employee)
+	if err := s.repo.Update(employee); err != nil {
+		return err
+	}
+
+	// Audit log
+	_ = s.audit.Log(actorID, "UPDATE", "employees", employee.ID, existingEmployee, employee, nil)
+
+	return nil
 }
 
 // DeleteEmployee removes an employee by ID
-func (s *employeeService) DeleteEmployee(id uint) error {
+func (s *employeeService) DeleteEmployee(actorID uint, id uint) error {
 	// Check if employee exists
-	_, err := s.repo.GetByID(id)
+	existing, err := s.repo.GetByID(id)
 	if err != nil {
 		return fmt.Errorf("employee with ID %d does not exist", id)
 	}
 
 	// TODO: Check if employee has any active assignments or dependencies before deletion
 	// For now, just delete the employee
-	return s.repo.Delete(id)
+	if err := s.repo.Delete(id); err != nil {
+		return err
+	}
+
+	// Audit log
+	_ = s.audit.Log(actorID, "DELETE", "employees", id, existing, nil, nil)
+
+	return nil
 }
 
 
