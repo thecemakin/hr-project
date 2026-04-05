@@ -15,8 +15,9 @@ help: ## Show this help message
 
 setup: tidy dc-up migrate-up swagger ## Setup the development environment (deps, db, migrations, swagger)
 
-run: ## Run the application
-	go run $(APP_ENTRY)
+run: ## Run the application (clears port 8080 first)
+	@lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+	@go run $(APP_ENTRY)
 
 build: ## Build the application binary
 	go build -o $(BINARY_NAME) $(APP_ENTRY)
