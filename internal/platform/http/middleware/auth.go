@@ -9,10 +9,19 @@ import (
 )
 
 // AuthMiddleware returns a middleware that validates JWT tokens
-func AuthMiddleware(tp *auth.TokenProvider) fiber.Handler {
+func AuthMiddleware(tp *auth.TokenProvider, appEnv string, skipAuth bool) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
+			// Skip authentication in development if configured
+			if appEnv == "development" && skipAuth {
+				log.Println("[DEV MODE] Bypassing authentication and injecting Admin identity")
+				c.Locals("user_id", uint(1))
+				c.Locals("email", "admin@hr-project.com")
+				c.Locals("role", "admin")
+				return c.Next()
+			}
+
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Missing authorization header",
 			})

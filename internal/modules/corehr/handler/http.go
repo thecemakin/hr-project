@@ -16,9 +16,11 @@ func SetupRoutesFiber(
 	assetAssignmentHandler *AssetAssignmentHandler,
 	organizationHandler *OrganizationHandler,
 	tp *auth.TokenProvider,
+	appEnv string,
+	skipAuth bool,
 ) {
 	// Create group for Core HR routes and apply authentication
-	v1 := app.Group("/api/v1/corehr", middleware.AuthMiddleware(tp))
+	v1 := app.Group("/api/v1/corehr", middleware.AuthMiddleware(tp, appEnv, skipAuth))
 
 	// Organization
 	v1.Get("/organization/tree", organizationHandler.GetTree)

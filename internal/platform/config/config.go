@@ -18,6 +18,7 @@ type Config struct {
 	DBSSLMode         string
 	JWTSecret         string
 	JWTAccessTokenTTL string
+	SkipAuth          bool
 }
 
 func Load() (*Config, error) {
@@ -37,6 +38,7 @@ func Load() (*Config, error) {
 		DBSSLMode:         getEnv("DB_SSLMODE", "disable"),
 		JWTSecret:         getEnv("JWT_SECRET", "super-secret-key-change-me"),
 		JWTAccessTokenTTL: getEnv("JWT_ACCESS_TOKEN_TTL", "15m"),
+		SkipAuth:          getEnv("SKIP_AUTH", "false") == "true",
 	}
 
 	// Security warning for production

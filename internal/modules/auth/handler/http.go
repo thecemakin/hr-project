@@ -6,7 +6,7 @@ import (
 	"github.com/thecemakin/hr-project/internal/platform/http/middleware"
 )
 
-func SetupRoutesFiber(app *fiber.App, handler *AuthHandler, tp *auth.TokenProvider) {
+func SetupRoutesFiber(app *fiber.App, handler *AuthHandler, tp *auth.TokenProvider, appEnv string, skipAuth bool) {
 	v1 := app.Group("/api/v1/auth")
 
 	// Public routes
@@ -14,7 +14,7 @@ func SetupRoutesFiber(app *fiber.App, handler *AuthHandler, tp *auth.TokenProvid
 
 	// Protected routes (Admin only for registration)
 	v1.Post("/register",
-		middleware.AuthMiddleware(tp),
+		middleware.AuthMiddleware(tp, appEnv, skipAuth),
 		middleware.RequireRole("admin"),
 		handler.Register,
 	)

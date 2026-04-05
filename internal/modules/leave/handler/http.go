@@ -8,13 +8,13 @@ import (
 )
 
 // SetupRoutesFiber configures all the routes for the Leave module using Fiber
-func SetupRoutesFiber(app *fiber.App, svc service.LeaveService, tp *auth.TokenProvider) {
+func SetupRoutesFiber(app *fiber.App, svc service.LeaveService, tp *auth.TokenProvider, appEnv string, skipAuth bool) {
 	leaveTypeHandler := NewLeaveTypeHandler(svc)
 	leaveBalanceHandler := NewLeaveBalanceHandler(svc)
 	leaveRequestHandler := NewLeaveRequestHandler(svc)
 
 	// Create group for Leave routes and apply authentication
-	v1 := app.Group("/api/v1/leave", middleware.AuthMiddleware(tp))
+	v1 := app.Group("/api/v1/leave", middleware.AuthMiddleware(tp, appEnv, skipAuth))
 
 	// Leave Types
 	v1.Get("/leave-types", leaveTypeHandler.ListLeaveTypes)

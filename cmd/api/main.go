@@ -80,7 +80,7 @@ func main() {
 	authHdl := authHandler.NewAuthHandler(authService)
 
 	// Mount Auth Routes
-	authHandler.SetupRoutesFiber(srv.App, authHdl, tp)
+	authHandler.SetupRoutesFiber(srv.App, authHdl, tp, cfg.AppEnv, cfg.SkipAuth)
 
 	// 6. Initialize CoreHR Module
 	employeeRepo := corehrRepo.NewEmployeeRepository(database)
@@ -103,14 +103,14 @@ func main() {
 	organizationHdl := corehrHandler.NewOrganizationHandler(employeeSvc)
 
 	// Mount Core HR Routes
-	corehrHandler.SetupRoutesFiber(srv.App, employeeHdl, departmentHdl, positionHdl, assetHdl, assetAssignmentHdl, organizationHdl, tp)
+	corehrHandler.SetupRoutesFiber(srv.App, employeeHdl, departmentHdl, positionHdl, assetHdl, assetAssignmentHdl, organizationHdl, tp, cfg.AppEnv, cfg.SkipAuth)
 
 	// 5. Initialize Leave Module
 	leaveRepository := leaveRepo.NewSQLRepository(database)
 	notificationService := notification.NewLogNotifier()
 	leaveService := leaveSvc.NewLeaveService(leaveRepository, employeeRepo, auditService, notificationService)
 	
-	leaveHandler.SetupRoutesFiber(srv.App, leaveService, tp)
+	leaveHandler.SetupRoutesFiber(srv.App, leaveService, tp, cfg.AppEnv, cfg.SkipAuth)
 
 	log.Printf("Listening and serving HTTP on :%s", cfg.HTTPPort)
 	if err := srv.App.Listen(":" + cfg.HTTPPort); err != nil {
